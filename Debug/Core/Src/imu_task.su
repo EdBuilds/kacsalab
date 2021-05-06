@@ -1,0 +1,4 @@
+imu_task.c:13:6:dik	16	static
+imu_task.c:17:6:StartImuTask	32	static
+imu_task.c:107:9:LSM6DS3_IO_Write	40	static
+imu_task.c:112:9:LSM6DS3_IO_Read	40	static
