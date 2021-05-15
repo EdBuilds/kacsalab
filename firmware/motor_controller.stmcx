@@ -16,7 +16,7 @@
 					<name>Motor</name>
 					<uid>M</uid>
 					<type>M</type>
-					<board_name>asdfd</board_name>
+					<board_name>asdfghh</board_name>
 					<original_board_name></original_board_name>
 					<vars>
 						<var version="1.0" type="MC_List" name="I/SM-PMSM" enable="true" visible="true" readonly="false" value="1">
@@ -27,7 +27,7 @@
 						</var>
 						<var version="1.0" type="MC_Int" name="Pole Pairs" enable="true" visible="true" readonly="false" value="2" />
 						<var version="1.0" type="MC_Int" name="Max Rated Speed" enable="true" visible="true" readonly="false" value="15000" />
-						<var version="1.0" type="MC_Double" name="Nominal Current" enable="true" visible="true" readonly="false" value="1.2" />
+						<var version="1.0" type="MC_Double" name="Nominal Current" enable="true" visible="true" readonly="false" value="20" />
 						<var version="1.0" type="MC_Double" name="Nominal DC Voltage" enable="true" visible="true" readonly="false" value="12" />
 						<var version="1.0" type="MC_Double" name="Rs" enable="true" visible="true" readonly="false" value="0.11" />
 						<var version="1.0" type="MC_Double" name="Ld" enable="true" visible="true" readonly="false" value="0.018000000000000002" />
