@@ -4,7 +4,7 @@
  *  Created on: 5 May 2021
  *      Author: tamas
  */
-#include "LSM6DS3_ACC_GYRO_driver.h"
+#include "LSM6DS3_ACC_GYRO_Driver.h"
 #include "cmsis_os.h"
 #include "i2c.h"
 
