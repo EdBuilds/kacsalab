@@ -39,34 +39,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := kacsalab_ccs
+BUILD_ARTIFACT_NAME := central_control_system
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX := 
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME).$(BUILD_ARTIFACT_EXTENSION)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-kacsalab_ccs.elf \
+central_control_system.elf \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-kacsalab_ccs.list \
+central_control_system.list \
 
 OBJCOPY_BIN += \
-kacsalab_ccs.bin \
+central_control_system.bin \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: kacsalab_ccs.elf secondary-outputs
+main-build: central_control_system.elf secondary-outputs
 
 # Tool invocations
-kacsalab_ccs.elf: $(OBJS) $(USER_OBJS) C:\Users\tamas\Documents\PlatformIO\Projects\kacsalab_ccs_cubemx\kacsalab_ccs\STM32F303K8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "kacsalab_ccs.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\tamas\Documents\PlatformIO\Projects\kacsalab_ccs_cubemx\kacsalab_ccs\STM32F303K8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="kacsalab_ccs.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+central_control_system.elf: $(OBJS) $(USER_OBJS) C:\Users\tamas\Documents\repos\kacsalab\firmware\central_control_system\STM32F303K8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "central_control_system.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\tamas\Documents\repos\kacsalab\firmware\central_control_system\STM32F303K8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="central_control_system.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -75,13 +75,13 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-kacsalab_ccs.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "kacsalab_ccs.list"
+central_control_system.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "central_control_system.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-kacsalab_ccs.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "kacsalab_ccs.bin"
+central_control_system.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "central_control_system.bin"
 	@echo 'Finished building: $@'
 	@echo ' '
 
