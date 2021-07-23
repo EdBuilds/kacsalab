@@ -81,7 +81,7 @@ typedef enum
 #define configurationFlag2_M1 (0|MCP_OVER_UARTA_FLAG|MCPA_OVER_UARTA_FLAG)
 #define NBR_OF_MOTORS  1
 #define DRIVE_TYPE_M1  0
-#define PRIM_SENSOR_M1  ePLL
+#define PRIM_SENSOR_M1  eENCODER
 #define AUX_SENSOR_M1  eENCODER
 #define TOPOLOGY_M1 0
 #define FOC_RATE_M1 1
