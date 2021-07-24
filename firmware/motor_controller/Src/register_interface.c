@@ -29,10 +29,7 @@
 #include "mc_configuration_registers.h"
 
 BusVoltageSensor_Handle_t* BusVoltageSensor[NBR_OF_MOTORS]={ &BusVoltageSensor_M1._Super};
-RevUpCtrl_Handle_t *RevUpControl[NBR_OF_MOTORS] = { &RevUpControlM1 };
-SpeednPosFdbk_Handle_t * SpeedSensor [NBR_OF_MOTORS] = {(SpeednPosFdbk_Handle_t *) &STO_PLL_M1 };
-SpeednPosFdbk_Handle_t * AuxSpeedSensor [NBR_OF_MOTORS] = {(SpeednPosFdbk_Handle_t *) &ENCODER_M1 };
-STO_PLL_Handle_t * stoPLLSensor [NBR_OF_MOTORS] = { &STO_PLL_M1 };
+SpeednPosFdbk_Handle_t * SpeedSensor [NBR_OF_MOTORS] = {(SpeednPosFdbk_Handle_t *) &ENCODER_M1 };
 PID_Handle_t *pPIDSpeed[NBR_OF_MOTORS] = { &PIDSpeedHandle_M1 };
 ENCODER_Handle_t *pEncoder[NBR_OF_MOTORS] = {&ENCODER_M1};
 
@@ -166,9 +163,6 @@ uint8_t RI_SetReg (uint16_t dataID, uint8_t * data, uint16_t *size, uint16_t fre
         }
       }
       break;
-    case MC_REG_RUC_STAGE_NBR:
-      retVal = MCP_ERROR_RO_REG;
-      break;
     default:
       retVal = MCP_ERROR_UNKNOWN_REG;
     }
@@ -248,38 +242,6 @@ uint8_t RI_SetReg (uint16_t dataID, uint8_t * data, uint16_t *size, uint16_t fre
     case MC_REG_HALL_SPEED:
       retVal = MCP_ERROR_RO_REG;
      break;
-    case MC_REG_STOPLL_C1:
-      {
-        int16_t hC1,hC2;
-        STO_PLL_GetObserverGains(stoPLLSensor[motorID],&hC1,&hC2);
-        STO_PLL_SetObserverGains(stoPLLSensor[motorID],regdata16,hC2);
-      }
-      break;
-    case MC_REG_STOPLL_C2:
-      {
-        int16_t hC1,hC2;
-        STO_PLL_GetObserverGains(stoPLLSensor[motorID],&hC1,&hC2);
-        STO_PLL_SetObserverGains(stoPLLSensor[motorID],hC1,regdata16);
-      }
-      break;
-    case MC_REG_STOPLL_KI:
-      {
-        PID_SetKI (&stoPLLSensor[motorID]->PIRegulator,regdata16);
-      }
-     break;
-    case MC_REG_STOPLL_KP:
-      {
-        PID_SetKP (&stoPLLSensor[motorID]->PIRegulator,regdata16);
-      }
-     break;
-    case MC_REG_STOPLL_EL_ANGLE:
-    case MC_REG_STOPLL_ROT_SPEED:
-    case MC_REG_STOPLL_I_ALPHA:
-    case MC_REG_STOPLL_I_BETA:
-    case MC_REG_STOPLL_BEMF_ALPHA:
-    case MC_REG_STOPLL_BEMF_BETA:
-      retVal = MCP_ERROR_RO_REG;
-     break;
     case MC_REG_DAC_USER1:
      break;
     case MC_REG_DAC_USER2:
@@ -310,12 +272,6 @@ uint8_t RI_SetReg (uint16_t dataID, uint8_t * data, uint16_t *size, uint16_t fre
       break;
     case MC_REG_I_Q_KD_DIV:
       PID_SetKDDivisorPOW2(pPIDIq[motorID], regdata16);
-      break;
-    case MC_REG_STOPLL_KI_DIV:
-      PID_SetKIDivisorPOW2 (&stoPLLSensor[motorID]->PIRegulator,regdata16);
-      break;
-    case MC_REG_STOPLL_KP_DIV:
-      PID_SetKPDivisorPOW2 (&stoPLLSensor[motorID]->PIRegulator,regdata16);
       break;
 
     default:
@@ -399,29 +355,6 @@ uint8_t RI_SetReg (uint16_t dataID, uint8_t * data, uint16_t *size, uint16_t fre
           }
           break;
 
-        case MC_REG_REVUP_DATA:
-          {
-            int32_t rpm;
-            RevUpCtrl_PhaseParams_t revUpPhase;
-            uint8_t i;
-            uint8_t nbrOfPhase = rawSize/ 8;
-            if ((rawSize % 8) || (nbrOfPhase > RUC_MAX_PHASE_NUMBER) != 0 )
-            {
-              retVal = MCP_ERROR_BAD_RAW_FORMAT;
-            }
-            else
-            {
-              for (i = 0; i <nbrOfPhase; i++){
-                rpm = *(int32_t *) &rawData[i*8];
-                revUpPhase.hFinalMecSpeedUnit = (uint16_t) (rpm * SPEED_UNIT ) / _RPM ;
-                revUpPhase.hFinalTorque = *((uint16_t *) &rawData[4+i*8]);
-                revUpPhase.hDurationms  = *((uint16_t *) &rawData[6+i*8]);
-                RUC_SetPhase( RevUpControl[motorID] ,i, &revUpPhase);
-              }
-            }
-          }
-          break;
-
         case MC_REG_ASYNC_UARTA:
           {
            retVal =  MCPA_cfgLog ( &MCPA_UART_A, rawData );
@@ -469,10 +402,6 @@ uint8_t RI_GetReg (uint16_t dataID, uint8_t * data, uint16_t *size, uint16_t fre
           break;
         case MC_REG_CONTROL_MODE:
           *data =  MCI_GetControlMode(pMCI);
-          break;
-        case MC_REG_RUC_STAGE_NBR:
-          *data = (RevUpControl[motorID] != MC_NULL ) ? RUC_GetNumberOfPhases(RevUpControl[motorID])
-            : 0;
           break;
         default:
           retVal = MCP_ERROR_UNKNOWN_REG;
@@ -571,60 +500,6 @@ uint8_t RI_GetReg (uint16_t dataID, uint8_t * data, uint16_t *size, uint16_t fre
         case MC_REG_ENCODER_SPEED:
           *regdata16 = SPD_GetS16Speed ((SpeednPosFdbk_Handle_t*) pEncoder[motorID]);
          break;
-        case MC_REG_STOPLL_EL_ANGLE:
-          {
-            *regdata16 = SPD_GetElAngle( (SpeednPosFdbk_Handle_t*) stoPLLSensor[motorID]);
-          }
-         break;
-        case MC_REG_STOPLL_ROT_SPEED:
-          {
-            *regdata16 = SPD_GetS16Speed((SpeednPosFdbk_Handle_t*) stoPLLSensor[motorID]);
-          }
-          break;
-        case MC_REG_STOPLL_I_ALPHA:
-          {
-            *regdata16 = STO_PLL_GetEstimatedCurrent(stoPLLSensor[motorID]).alpha;
-          }
-          break;
-        case MC_REG_STOPLL_I_BETA:
-          {
-            *regdata16 = STO_PLL_GetEstimatedCurrent(stoPLLSensor[motorID]).beta;
-          }
-         break;
-        case MC_REG_STOPLL_BEMF_ALPHA:
-          {
-            *regdata16 = STO_PLL_GetEstimatedBemf(stoPLLSensor[motorID]).alpha;
-          }
-          break;
-        case MC_REG_STOPLL_BEMF_BETA:
-          {
-            *regdata16 = STO_PLL_GetEstimatedBemf(stoPLLSensor[motorID]).beta;
-          }
-          break;
-        case MC_REG_STOPLL_C1:
-          {
-            int16_t hC1,hC2;
-            STO_PLL_GetObserverGains(stoPLLSensor[motorID],&hC1,&hC2);
-            *regdata16 = hC1;
-          }
-        break;
-        case MC_REG_STOPLL_C2:
-          {
-            int16_t hC1,hC2;
-            STO_PLL_GetObserverGains(stoPLLSensor[motorID],&hC1,&hC2);
-            *regdata16 = hC2;
-          }
-          break;
-        case MC_REG_STOPLL_KI:
-          {
-            *regdata16 = PID_GetKI (&stoPLLSensor[motorID]->PIRegulator);
-          }
-         break;
-        case MC_REG_STOPLL_KP:
-          {
-            *regdata16 = PID_GetKP (&stoPLLSensor[motorID]->PIRegulator);
-          }
-          break;
         case MC_REG_DAC_USER1:
          break;
         case MC_REG_DAC_USER2:
@@ -657,12 +532,6 @@ uint8_t RI_GetReg (uint16_t dataID, uint8_t * data, uint16_t *size, uint16_t fre
         case MC_REG_I_Q_KD_DIV:
           *regdataU16 = PID_GetKDDivisor(pPIDIq[motorID]);
           break;
-        case MC_REG_STOPLL_KI_DIV:
-          *regdataU16 = PID_GetKIDivisor(&stoPLLSensor[motorID]->PIRegulator);
-          break;
-        case MC_REG_STOPLL_KP_DIV:
-          *regdataU16 = PID_GetKPDivisor(&stoPLLSensor[motorID]->PIRegulator);
-          break;
 
         default:
           retVal = MCP_ERROR_UNKNOWN_REG;
@@ -691,12 +560,6 @@ uint8_t RI_GetReg (uint16_t dataID, uint8_t * data, uint16_t *size, uint16_t fre
           break;
         case MC_REG_SPEED_REF:
           *regdata32 = (((int32_t)MCI_GetMecSpeedRefUnit(pMCI)*_RPM)/SPEED_UNIT);
-          break;
-        case MC_REG_STOPLL_EST_BEMF:
-          *regdata32 = STO_PLL_GetEstimatedBemfLevel(stoPLLSensor[motorID]);
-          break;
-        case MC_REG_STOPLL_OBS_BEMF:
-          *regdata32 = STO_PLL_GetObservedBemfLevel(stoPLLSensor[motorID]);
           break;
         default:
           retVal = MCP_ERROR_UNKNOWN_REG;
@@ -790,33 +653,6 @@ uint8_t RI_GetReg (uint16_t dataID, uint8_t * data, uint16_t *size, uint16_t fre
           *duration = MCI_GetLastRampFinalDuration(pMCI) ;
         }
         break;
-
-            case MC_REG_REVUP_DATA:
-      {
-        int32_t *rpm;
-        uint16_t *finalTorque;
-        uint16_t *durationms;
-        RevUpCtrl_PhaseParams_t revUpPhase;
-        uint8_t i;
-
-        *rawSize = RUC_MAX_PHASE_NUMBER*8;
-        if ((*rawSize) +2  > freeSpace)
-        {
-          retVal = MCP_ERROR_NO_TXSYNC_SPACE;
-        }
-        else
-        {
-          for (i = 0; i <RUC_MAX_PHASE_NUMBER; i++){
-            RUC_GetPhase( RevUpControl[motorID] ,i, &revUpPhase);
-            rpm = (int32_t *) &data[2+i*8];
-            *rpm = (revUpPhase.hFinalMecSpeedUnit * _RPM) / SPEED_UNIT;
-            finalTorque = (uint16_t *) &data[6+i*8];
-            *finalTorque = revUpPhase.hFinalTorque;
-            durationms  = (uint16_t *) &data[8+i*8];
-            *durationms  = revUpPhase.hDurationms;
-          }
-        }
-      }
       break;
       case MC_REG_CURRENT_REF:
       {
@@ -945,22 +781,6 @@ __weak uint8_t RI_GetPtrReg (uint16_t dataID, void ** dataPtr)
       break;
       case MC_REG_ENCODER_EL_ANGLE:
         *dataPtr = &(pEncoder[motorID]->_Super.hElAngle);
-      break;
-      case MC_REG_STOPLL_ROT_SPEED:
-        *dataPtr = &(stoPLLSensor[motorID]->_Super.hAvrMecSpeedUnit);
-      break;
-      case MC_REG_STOPLL_EL_ANGLE:
-        *dataPtr = &(stoPLLSensor[motorID]->_Super.hElAngle);
-      break;
-      //case MC_REG_STOPLL_I_ALPHA:
-      //break;
-      //case MC_REG_STOPLL_I_BETA:
-      //break;
-      case MC_REG_STOPLL_BEMF_ALPHA:
-        *dataPtr = &(stoPLLSensor[motorID]->hBemf_alfa_est);
-      break;
-      case MC_REG_STOPLL_BEMF_BETA:
-        *dataPtr = &(stoPLLSensor[motorID]->hBemf_beta_est);
       break;
       default:
         *dataPtr = &nullData16;

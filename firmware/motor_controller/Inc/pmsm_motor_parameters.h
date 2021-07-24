@@ -28,7 +28,7 @@
  ************************/
 
 /***************** MOTOR ELECTRICAL PARAMETERS  ******************************/
-#define POLE_PAIR_NUM          2 /* Number of motor pole pairs */
+#define POLE_PAIR_NUM          7 /* Number of motor pole pairs */
 #define RS                     0.11 /* Stator resistance , ohm*/
 #define LS                     0.000018 /* Stator inductance, H
                                                  For I-PMSM it is equal to Lq */
@@ -62,7 +62,7 @@
                                                  signal H1 and the maximum of
                                                  the Bemf induced on phase A */
 /*** Quadrature encoder ***/
-#define M1_ENCODER_PPR             400  /*!< Number of pulses per
+#define M1_ENCODER_PPR             1024  /*!< Number of pulses per
                                             revolution */
 
 #endif /*__PMSM_MOTOR_PARAMETERS_H*/

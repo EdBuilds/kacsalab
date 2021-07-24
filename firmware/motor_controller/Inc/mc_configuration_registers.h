@@ -82,7 +82,7 @@ typedef enum
 #define NBR_OF_MOTORS  1
 #define DRIVE_TYPE_M1  0
 #define PRIM_SENSOR_M1  eENCODER
-#define AUX_SENSOR_M1  eENCODER
+#define AUX_SENSOR_M1  eNO_SENSOR
 #define TOPOLOGY_M1 0
 #define FOC_RATE_M1 1
 #define PWM_FREQ_M1 30000
