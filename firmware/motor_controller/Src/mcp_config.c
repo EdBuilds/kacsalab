@@ -25,6 +25,10 @@
 #include "mcp.h"
 #include "mcpa.h"
 #include "mcp_config.h"
+#include "stlink_usart_config.h"
+
+
+UASPEP_Handle_t STLINK_USART_uaspep;
 
 uint8_t MCPSyncTxBuff[MCP_TX_SYNCBUFFER_SIZE];
 uint8_t MCPSyncRXBuff[MCP_RX_SYNCBUFFER_SIZE];
@@ -32,15 +36,6 @@ uint8_t MCPSyncRXBuff[MCP_RX_SYNCBUFFER_SIZE];
 /* Asynchronous buffer dedicated to UART_A*/
 uint8_t MCPAsyncBuffUARTA_A[MCP_TX_ASYNCBUFFER_SIZE_A];
 uint8_t MCPAsyncBuffUARTA_B[MCP_TX_ASYNCBUFFER_SIZE_A];
-
-UASPEP_Handle_t UASPEP_A =
-{
- .USARTx = USARTA,
- .rxDMA = DMA_RX_A,
- .txDMA = DMA_TX_A,
- .rxChannel = DMACH_RX_A,
- .txChannel = DMACH_TX_A,
-};
 
 ASPEP_Handle_t aspepOverUartA =
 {
@@ -50,7 +45,7 @@ ASPEP_Handle_t aspepOverUartA =
     .fSendPacket = &ASPEP_sendPacket,
     .fRXPacketProcess = &ASPEP_RXframeProcess,
     },
-  .HWIp = &UASPEP_A,
+  .HWIp = &STLINK_USART_uaspep,
   .Capabilities = {
     .DATA_CRC = 0,
     .RX_maxSize =  (MCP_RX_SYNC_PAYLOAD_MAX>>5)-1,

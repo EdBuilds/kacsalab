@@ -30,6 +30,8 @@
 #include "stm32g4xx_hal.h"
 #include "stm32g4xx.h"
 #include "mcp_config.h"
+#include "bmmcp_config.h"
+#include "bmmcp/bmmcp_common.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -190,7 +192,12 @@ void MCP_RX_IRQHandler_A(void)
   /* Buffer is ready by the HW layer to be processed */
   if (LL_DMA_IsActiveFlag_TC (DMA_RX_A, DMACH_RX_A) ){
     LL_DMA_ClearFlag_TC (DMA_RX_A, DMACH_RX_A);
+
+#ifdef ASPEP
     ASPEP_HWDataReceivedIT (&aspepOverUartA);
+#elif BMMCP
+    BMMCP_HWDataReceivedIT(&BMMCP_handle);
+#endif
   }
   /* USER CODE BEGIN MCP_RX_IRQHandler_A 1 */
 
@@ -218,7 +225,11 @@ void USARTA_IRQHandler(void)
     LL_USART_ClearFlag_TC (USARTA);
     /* Data Sent by UART*/
     /* Need to free the buffer, and to check pending transfer*/
+#ifdef ASPEP
     ASPEP_HWDataTransmittedIT (&aspepOverUartA);
+#else
+    BMMCP_HWDataTransmittedIT(&BMMCP_handle);
+#endif
    // LL_GPIO_ResetOutputPin( GPIOC , LL_GPIO_PIN_6  );
   }
   if ( (LL_USART_IsActiveFlag_ORE (USARTA) || LL_USART_IsActiveFlag_FE (USARTA) || LL_USART_IsActiveFlag_NE (USARTA))
@@ -239,7 +250,12 @@ void USARTA_IRQHandler(void)
     LL_USART_DisableDMAReq_RX (USARTA);
     LL_USART_ReceiveData8(USARTA);
     LL_USART_EnableDMAReq_RX (USARTA);
+
+#ifdef ASPEP
     ASPEP_HWDMAReset (&aspepOverUartA);
+#elif BMMCP
+    // TODO: Do I need this?
+#endif
   }
 
   /* USER CODE BEGIN USARTA_IRQn 1 */

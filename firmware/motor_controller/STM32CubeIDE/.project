@@ -31,6 +31,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>bmmcp</name>
+			<type>2</type>
+			<location>/home/tamas/general/kacsalab/firmware/libcommon/bmmcp</location>
+		</link>
+		<link>
 			<name>motor_controller.ioc</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/motor_controller.ioc</locationURI>
@@ -361,4 +366,10 @@
 			<locationURI>PARENT-1-PROJECT_LOC/MCSDK_v5.Y.1/MotorControl/MCSDK/MCLib/Any/Src/virtual_speed_sensor.c</locationURI>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>libcommon</name>
+			<value>file:/home/tamas/general/kacsalab/firmware/libcommon</value>
+		</variable>
+	</variableList>
 </projectDescription>

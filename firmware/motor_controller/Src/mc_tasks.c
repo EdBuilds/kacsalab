@@ -33,6 +33,10 @@
 #include "mc_tasks.h"
 #include "parameters_conversion.h"
 #include "mcp_config.h"
+#include "bmmcp_config.h"
+#include "bmmcp_slave.h"
+#include "bmmcp/bmmcp_common.h"
+
 
 /* USER CODE BEGIN Includes */
 
@@ -124,8 +128,11 @@ __weak void MCboot( MCI_Handle_t* pMCIList[NBR_OF_MOTORS] )
   /**********************************************************/
   pwmcHandle[M1] = &PWM_Handle_M1._Super;
   R3_2_Init(&PWM_Handle_M1);
+#ifdef ASPEP
   ASPEP_start (&aspepOverUartA);
-
+#elif BMMCP
+  BMMCP_init(&BMMCP_handle);
+#endif
   /* USER CODE BEGIN MCboot 1 */
 
   /* USER CODE END MCboot 1 */
@@ -250,6 +257,7 @@ __weak void MC_Scheduler(void)
     {
       TSK_MediumFrequencyTaskM1();
 
+#ifdef ASPEP
       MCP_Over_UartA.rxBuffer = MCP_Over_UartA.pTransportLayer->fRXPacketProcess ( MCP_Over_UartA.pTransportLayer,  &MCP_Over_UartA.rxLength);
       if (MCP_Over_UartA.rxBuffer)
       {
@@ -265,6 +273,9 @@ __weak void MC_Scheduler(void)
         }
       }
 
+#elif BMMCP
+      BMMCP_slave_process();
+#endif
       /* USER CODE BEGIN MC_Scheduler 1 */
 
       /* USER CODE END MC_Scheduler 1 */
@@ -688,10 +699,16 @@ __weak uint8_t TSK_HighFrequencyTask(void)
   /* USER CODE END HighFrequencyTask 1 */
 
   GLOBAL_TIMESTAMP++;
+
+#ifdef ASPEP
   if (MCPA_UART_A.Mark != 0)
   {
     MCPA_dataLog (&MCPA_UART_A);
   }
+
+#elif BMMCP
+    // TODO: Do I need this?
+#endif
 
   return bMotorNbr;
 }
