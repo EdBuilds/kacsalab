@@ -1,0 +1,20 @@
+---
+:source:
+  :path: central_control_system/Core/test
+  :file: test_motor_interface.c
+:successes:
+- :test: test_angles_set_home_normal
+  :line: 4
+  :message: ''
+- :test: test_angles_set_home_bad_output
+  :line: 9
+  :message: ''
+:failures: []
+:ignores: []
+:counts:
+  :total: 2
+  :passed: 2
+  :failed: 0
+  :ignored: 0
+:stdout: []
+:time: 0.0011441420001574443

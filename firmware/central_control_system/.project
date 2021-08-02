@@ -29,4 +29,16 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>Core/bmmcp</name>
+			<type>2</type>
+			<locationURI>WORKSPACE_LOC/libcommon/bmmcp</locationURI>
+		</link>
+		<link>
+			<name>Core/test</name>
+			<type>2</type>
+			<location>/home/tamas/general/kacsalab/firmware/central_control_system/Core/test</location>
+		</link>
+	</linkedResources>
 </projectDescription>

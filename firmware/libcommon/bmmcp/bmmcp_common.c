@@ -89,6 +89,7 @@ void BMMCP_HWDataReceivedIT(BMMCP_handle_t * bmmcp_handle) {
 	switch (bmmcp_handle->receive_buffer_lock) {
 		case BMMCP_write_lock:
 			bmmcp_handle->receive_buffer_lock = BMMCP_full;
+			bmmcp_handle->receive_callback_func();
 		break;
 		default:
 			// Unexpected value, something's fishy
@@ -108,10 +109,11 @@ void BMMCP_HWDataTransmittedIT(BMMCP_handle_t * bmmcp_handle) {
 	}
 }
 
-BMMCP_return_t BMMCP_init(BMMCP_handle_t * bmmcp_handle) {
+BMMCP_return_t BMMCP_init(BMMCP_handle_t * bmmcp_handle, BMMCP_receive_callback_func_t receive_callback_func) {
 
     bmmcp_handle->init_hw_func(bmmcp_handle->HW_if);
 	bmmcp_handle->receive_buffer_lock = BMMCP_write_lock;
 	bmmcp_handle->receive_packet_func(bmmcp_handle->HW_if, bmmcp_handle->receive_buffer, BMMCP_PACKET_LENGTH);
+	bmmcp_handle->receive_callback_func = receive_callback_func;
 	return BMMCP_ok;
 }

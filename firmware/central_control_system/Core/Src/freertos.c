@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "imu_task.h"
+#include "bmmcp_master_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,6 +50,12 @@
 osThreadId_t imu_task_handle;
 const osThreadAttr_t imu_task_attributes = {
   .name = "imuTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityRealtime,
+};
+osThreadId_t bmmcp_master_task_handle;
+const osThreadAttr_t bmmcp_master_task_attributes = {
+  .name = "bmmcp_master_task",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
@@ -103,6 +110,7 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   imu_task_handle = osThreadNew(StartImuTask, NULL, &imu_task_attributes);
+  bmmcp_master_task_handle = osThreadNew(start_bmmcp_master_task, NULL, &bmmcp_master_task_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */

@@ -23,7 +23,6 @@
 #include "stm32f3xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "imu_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,6 +56,10 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern CAN_HandleTypeDef hcan;
+extern DMA_HandleTypeDef hdma_usart2_rx;
+extern DMA_HandleTypeDef hdma_usart2_tx;
+extern UART_HandleTypeDef huart2;
 extern TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN EV */
@@ -167,13 +170,11 @@ void DebugMon_Handler(void)
 void EXTI0_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_IRQn 0 */
-	BaseType_t higher_prio_task_woken = pdFALSE;
-    IMU_int1_handler(&higher_prio_task_woken);
+
   /* USER CODE END EXTI0_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
   /* USER CODE BEGIN EXTI0_IRQn 1 */
 
-	portYIELD_FROM_ISR(higher_prio_task_woken);
   /* USER CODE END EXTI0_IRQn 1 */
 }
 
@@ -183,13 +184,82 @@ void EXTI0_IRQHandler(void)
 void EXTI1_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI1_IRQn 0 */
-	BaseType_t higher_prio_task_woken = pdFALSE;
-    IMU_int2_handler(&higher_prio_task_woken);
+
   /* USER CODE END EXTI1_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
   /* USER CODE BEGIN EXTI1_IRQn 1 */
-	portYIELD_FROM_ISR(higher_prio_task_woken);
+
   /* USER CODE END EXTI1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 channel6 global interrupt.
+  */
+void DMA1_Channel6_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel6_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel6_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart2_rx);
+  /* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel6_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 channel7 global interrupt.
+  */
+void DMA1_Channel7_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel7_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel7_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart2_tx);
+  /* USER CODE BEGIN DMA1_Channel7_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel7_IRQn 1 */
+}
+
+/**
+  * @brief This function handles CAN TX interrupt.
+  */
+void CAN_TX_IRQHandler(void)
+{
+  /* USER CODE BEGIN CAN_TX_IRQn 0 */
+
+  /* USER CODE END CAN_TX_IRQn 0 */
+  HAL_CAN_IRQHandler(&hcan);
+  /* USER CODE BEGIN CAN_TX_IRQn 1 */
+
+  /* USER CODE END CAN_TX_IRQn 1 */
+}
+
+/**
+  * @brief This function handles CAN RX0 interrupt.
+  */
+void CAN_RX0_IRQHandler(void)
+{
+  /* USER CODE BEGIN CAN_RX0_IRQn 0 */
+
+  /* USER CODE END CAN_RX0_IRQn 0 */
+  HAL_CAN_IRQHandler(&hcan);
+  /* USER CODE BEGIN CAN_RX0_IRQn 1 */
+
+  /* USER CODE END CAN_RX0_IRQn 1 */
+}
+
+/**
+  * @brief This function handles CAN RX1 interrupt.
+  */
+void CAN_RX1_IRQHandler(void)
+{
+  /* USER CODE BEGIN CAN_RX1_IRQn 0 */
+
+  /* USER CODE END CAN_RX1_IRQn 0 */
+  HAL_CAN_IRQHandler(&hcan);
+  /* USER CODE BEGIN CAN_RX1_IRQn 1 */
+
+  /* USER CODE END CAN_RX1_IRQn 1 */
 }
 
 /**
@@ -204,6 +274,20 @@ void TIM2_IRQHandler(void)
   /* USER CODE BEGIN TIM2_IRQn 1 */
 
   /* USER CODE END TIM2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART2 global interrupt / USART2 wake-up interrupt through EXT line 26.
+  */
+void USART2_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART2_IRQn 0 */
+
+  /* USER CODE END USART2_IRQn 0 */
+  HAL_UART_IRQHandler(&huart2);
+  /* USER CODE BEGIN USART2_IRQn 1 */
+
+  /* USER CODE END USART2_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

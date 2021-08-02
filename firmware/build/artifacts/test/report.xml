@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<testsuites tests="3" failures="0" skipped="0" time="0.002282">
+  <testsuite name="test_motor_interface" tests="2" failures="0" skipped="0" time="0.001144">
+    <testcase name="test_angles_set_home_normal" />
+    <testcase name="test_angles_set_home_bad_output" />
+  </testsuite>
+  <testsuite name="test_shared_task_resources" tests="1" failures="0" skipped="0" time="0.001138">
+    <testcase name="test_shared_resource_init" />
+  </testsuite>
+</testsuites>

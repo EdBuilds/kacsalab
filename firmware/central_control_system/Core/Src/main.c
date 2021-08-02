@@ -21,8 +21,11 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "i2c.h"
-#include "usart.h"
 #include "gpio.h"
+#include "uart_bmmcp_driver.h"
+#include "stlink_uart_config.h"
+#include "bmmcp/bmmcp_common.h"
+#include "bmmcp_config.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -59,6 +62,8 @@ void MX_FREERTOS_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+extern STLINK_USART_Handle_t STLINK_USART_handle;
+extern BMMCP_handle_t BMMCP_handle;
 /* USER CODE END 0 */
 
 /**
@@ -77,7 +82,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -90,9 +94,8 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
-  MX_USART2_UART_Init();
-  /* USER CODE BEGIN 2 */
 
+  /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
 
   /* Init scheduler */

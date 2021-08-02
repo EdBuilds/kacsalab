@@ -1,0 +1,17 @@
+---
+:source:
+  :path: central_control_system/Core/test
+  :file: test_shared_task_resources.c
+:successes:
+- :test: test_shared_resource_init
+  :line: 10
+  :message: ''
+:failures: []
+:ignores: []
+:counts:
+  :total: 1
+  :passed: 1
+  :failed: 0
+  :ignored: 0
+:stdout: []
+:time: 0.001137795999966329
