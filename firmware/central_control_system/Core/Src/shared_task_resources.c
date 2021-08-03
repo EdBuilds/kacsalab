@@ -10,7 +10,7 @@
 
 static osMessageQueueId_t s_bmmcp_queue_id = 0U;
 static uint8_t s_cb_mem[80] = {0U};
-static uint8_t s_bmmcp_mq_mem[BMMCP_MSG_QUEUE_SIZE * sizeof(BMMCP_universal_packet_t)] = {0U};
+static uint8_t s_bmmcp_mq_mem[BMMCP_MSG_QUEUE_SIZE * sizeof(BMMCP_master_task_msg_t)] = {0U};
 
 uint32_t SHARED_TASK_init()
 {
@@ -20,9 +20,9 @@ uint32_t SHARED_TASK_init()
 			.cb_mem = s_cb_mem,
 			.cb_size = 80,
 			.mq_mem = s_bmmcp_mq_mem,
-			.mq_size = BMMCP_MSG_QUEUE_SIZE * sizeof(BMMCP_universal_packet_t),
+			.mq_size = BMMCP_MSG_QUEUE_SIZE * sizeof(BMMCP_master_task_msg_t),
 	};
-	s_bmmcp_queue_id = osMessageQueueNew(BMMCP_MSG_QUEUE_SIZE, sizeof(BMMCP_universal_packet_t), &message_queue_attrs);
+	s_bmmcp_queue_id = osMessageQueueNew(BMMCP_MSG_QUEUE_SIZE, sizeof(BMMCP_master_task_msg_t), &message_queue_attrs);
 
 	if (s_bmmcp_queue_id == NULL) {
 		return 1U;

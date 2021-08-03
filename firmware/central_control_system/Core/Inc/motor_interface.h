@@ -7,6 +7,9 @@
 
 #ifndef INC_MOTOR_INTERFACE_H_
 #define INC_MOTOR_INTERFACE_H_
+
+#include "stdint.h"
+
 typedef enum{
 	MOTOR_state_unknown = 0,
 	MOTOR_state_running = 1,
@@ -21,6 +24,8 @@ typedef enum {
 typedef struct {
 	uint8_t motor_id;
 	float velocity_radps;
+	MOTOR_state_t state;
+
 }MOTOR_handle_t;
 
 MOTOR_return_t MOTOR_init(MOTOR_handle_t *handle, uint8_t motor_id);

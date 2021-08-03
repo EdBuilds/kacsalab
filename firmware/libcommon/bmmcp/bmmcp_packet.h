@@ -25,6 +25,7 @@ typedef enum {
 }BMMCP_response_t;
 
 typedef struct {
+	uint8_t id;
 	BMMCP_command_t command;
 	union {
 		uint16_t velocity;

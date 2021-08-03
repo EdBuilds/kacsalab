@@ -15,6 +15,7 @@
 #include "shared_data.h"
 
 #define IMU_TASK_QUEUE_LENGTH (3U)
+#define IMU_MEAS_AX_NUM (3U)
 
 typedef enum {
 	IMU_TASK_new_acc_meas,
@@ -59,6 +60,29 @@ static float raw_acc_to_g(int16_t raw_acc)
 {
 	return (float)raw_acc / (float)INT16_MAX * 2.0f;
 }
+
+static uint8_t axis_to_idx(FRAME_axis_t axis);
+static uint8_t axis_to_idx(FRAME_axis_t axis) {
+	uint8_t idx = 0;
+	switch (axis) {
+	case FRAME_roll:
+		idx = 0;
+	break;
+
+	case FRAME_pitch:
+		idx = 1;
+	break;
+
+	case FRAME_yaw:
+		idx = 2;
+	break;
+	default:
+	break;
+	}
+	return idx;
+}
+static const FRAME_axis_t idx_to_axis[FRAME_axis_num] = {FRAME_roll, FRAME_pitch, FRAME_yaw};
+
 void StartImuTask(void *argument)
 {
 	IMU_task_queue = xQueueCreateStatic(IMU_TASK_QUEUE_LENGTH, sizeof(IMU_TASK_command_t), IMU_TASK_queue_container, &IMU_TASK_xStaticQueue);
@@ -157,17 +181,18 @@ void StartImuTask(void *argument)
 		  dik();
 	  }
 
-    IMU_TASK_command_t received_command = IMU_TASK_invalid;
+  IMU_TASK_command_t received_command = IMU_TASK_invalid;
+  float gyro_ang_rate[IMU_MEAS_AX_NUM] = {0.0f, 0.0f, 0.0f};
+  float acc_g[IMU_MEAS_AX_NUM] = {0.0f, 0.0f, 0.0f};
+
   for(;;)
   {
       if( xQueueReceive( IMU_task_queue,
                          &received_command,
                          portMAX_DELAY ) == pdPASS )
       {
-    	  int16_t acc_data[3] = {0, 0, 0};
-    	  int16_t gyro_data[3] = {0, 0, 0};
-    	  float gyro_ang_rate[3] = {0.0f, 0.0f, 0.0f};
-    	  float acc_g[3] = {0.0f, 0.0f, 0.0f};
+    	  int16_t acc_data[IMU_MEAS_AX_NUM] = {0, 0, 0};
+    	  int16_t gyro_data[IMU_MEAS_AX_NUM] = {0, 0, 0};
     	  uint8_t regValue[6] = {0, 0, 0, 0, 0, 0};
 
     	  switch (received_command) {
@@ -177,12 +202,10 @@ void StartImuTask(void *argument)
     		    	  dik();
     		      }
     		      /* Format the data. */
-    		      acc_data[0] = ( ( ( ( int16_t )regValue[1] ) << 8 ) + ( int16_t )regValue[0] );
-    		      acc_data[1] = ( ( ( ( int16_t )regValue[3] ) << 8 ) + ( int16_t )regValue[2] );
-    		      acc_data[2] = ( ( ( ( int16_t )regValue[5] ) << 8 ) + ( int16_t )regValue[4] );
-    		      acc_g[0] = raw_acc_to_g(acc_data[0]);
-    		      acc_g[1] = raw_acc_to_g(acc_data[1]);
-    		      acc_g[2] = raw_acc_to_g(acc_data[2]);
+
+    	  		  for (uint8_t idx = 0; idx < IMU_MEAS_AX_NUM; ++idx) {
+    	  			  acc_g[idx] = raw_acc_to_g((((int16_t)regValue[(idx * 2) + 1] ) << 8) + (int16_t)regValue[idx * 2]);
+    	  		  }
     		      IMU_TASK_acc_data_received = true;
     		  break;
 
@@ -192,10 +215,10 @@ void StartImuTask(void *argument)
     	  			  dik();
     	  		  }
     		      /* Format the data. */
-    		      gyro_ang_rate[0] = raw_gyro_to_radps( ( ( ( int16_t )regValue[1] ) << 8 ) + ( int16_t )regValue[0] );
-    		      gyro_ang_rate[1] = raw_gyro_to_radps( ( ( ( int16_t )regValue[3] ) << 8 ) + ( int16_t )regValue[2] );
-    		      gyro_ang_rate[2] = raw_gyro_to_radps( ( ( ( int16_t )regValue[5] ) << 8 ) + ( int16_t )regValue[4] );
-
+    	  		  for (uint8_t idx = 0; idx < IMU_MEAS_AX_NUM; ++idx) {
+    	  			  gyro_ang_rate[idx] = raw_gyro_to_radps((((int16_t)regValue[(idx * 2) + 1]) << 8) + (int16_t)regValue[idx * 2]);
+    	  			  FRAME_set_rate(idx_to_axis[idx], gyro_ang_rate[idx]);
+    	  		  }
     		      IMU_TASK_gyro_data_received = true;
     		  break;
 
@@ -205,14 +228,13 @@ void StartImuTask(void *argument)
     	  }
     	  MADGWICK_euler_angles_t angles = {0};
     	  if (IMU_TASK_acc_data_received && IMU_TASK_gyro_data_received) {
-    		  IMU_TASK_acc_data_received = true;
-			  IMU_TASK_gyro_data_received = true;
+    		  IMU_TASK_acc_data_received = false;
+			  IMU_TASK_gyro_data_received = false;
 			  MadgwickAHRSupdateIMU(gyro_ang_rate[0], gyro_ang_rate[1], gyro_ang_rate[2], acc_g[0], acc_g[1], acc_g[2]);
 			  MadgwickAHRSgetAngles(&angles);
+			  float angles[IMU_MEAS_AX_NUM] = {angles.roll, angles.pitch, angles.yaw};
+    	  	  FRAME_set_angle(idx_to_axis[idx], angles[idx]);
 
-			  SD_angles.roll = angles.roll;
-			  SD_angles.pitch = angles.pitch;
-			  SD_angles.yaw = angles.yaw;
     	  }
 
       }
