@@ -13,6 +13,7 @@
 #include "math.h"
 #include "stdbool.h"
 #include "shared_data.h"
+#include "frame_state_object.h"
 
 #define IMU_TASK_QUEUE_LENGTH (3U)
 #define IMU_MEAS_AX_NUM (3U)
@@ -23,7 +24,6 @@ typedef enum {
 	IMU_TASK_invalid
 } IMU_TASK_command_t;
 
-SD_euler_angles_t SD_angles;
 static uint8_t IMU_TASK_queue_container[IMU_TASK_QUEUE_LENGTH * sizeof(IMU_TASK_command_t)] = {0};
 static StaticQueue_t IMU_TASK_xStaticQueue;
 I2C_HandleTypeDef hi2c1;
@@ -191,8 +191,6 @@ void StartImuTask(void *argument)
                          &received_command,
                          portMAX_DELAY ) == pdPASS )
       {
-    	  int16_t acc_data[IMU_MEAS_AX_NUM] = {0, 0, 0};
-    	  int16_t gyro_data[IMU_MEAS_AX_NUM] = {0, 0, 0};
     	  uint8_t regValue[6] = {0, 0, 0, 0, 0, 0};
 
     	  switch (received_command) {
@@ -227,13 +225,16 @@ void StartImuTask(void *argument)
 
     	  }
     	  MADGWICK_euler_angles_t angles = {0};
+
     	  if (IMU_TASK_acc_data_received && IMU_TASK_gyro_data_received) {
     		  IMU_TASK_acc_data_received = false;
 			  IMU_TASK_gyro_data_received = false;
 			  MadgwickAHRSupdateIMU(gyro_ang_rate[0], gyro_ang_rate[1], gyro_ang_rate[2], acc_g[0], acc_g[1], acc_g[2]);
 			  MadgwickAHRSgetAngles(&angles);
-			  float angles[IMU_MEAS_AX_NUM] = {angles.roll, angles.pitch, angles.yaw};
-    	  	  FRAME_set_angle(idx_to_axis[idx], angles[idx]);
+			  float angles_arr[IMU_MEAS_AX_NUM] = {angles.roll, angles.pitch, angles.yaw};
+    	  	  for (uint8_t idx = 0; idx < IMU_MEAS_AX_NUM; ++idx) {
+    	  		FRAME_set_angle(idx_to_axis[idx], angles_arr[idx]);
+    	  	  }
 
     	  }
 

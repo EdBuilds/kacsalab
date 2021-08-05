@@ -7,7 +7,7 @@
 
 #ifndef BMMCP_BMMCP_PACKET_H_
 #define BMMCP_BMMCP_PACKET_H_
-
+#include "stdint.h"
 typedef enum {
 	BMMCP_no_command = 0,
 	BMMCP_start_motor = 1,

@@ -28,6 +28,8 @@
 /* USER CODE BEGIN Includes */
 #include "imu_task.h"
 #include "bmmcp_master_task.h"
+#include "command_console_task.h"
+#include "shared_task_resources.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,18 +49,28 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+
 osThreadId_t imu_task_handle;
 const osThreadAttr_t imu_task_attributes = {
   .name = "imuTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
+
 osThreadId_t bmmcp_master_task_handle;
 const osThreadAttr_t bmmcp_master_task_attributes = {
   .name = "bmmcp_master_task",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
+
+osThreadId_t command_console_task_handle;
+const osThreadAttr_t command_console_task_attributes = {
+  .name = "defaultTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -67,7 +79,6 @@ const osThreadAttr_t defaultTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
@@ -101,6 +112,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+	SHARED_TASK_init();
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -111,6 +123,7 @@ void MX_FREERTOS_Init(void) {
   /* add threads, ... */
   imu_task_handle = osThreadNew(StartImuTask, NULL, &imu_task_attributes);
   bmmcp_master_task_handle = osThreadNew(start_bmmcp_master_task, NULL, &bmmcp_master_task_attributes);
+  command_console_task_handle = osThreadNew(start_command_console_task, NULL, &command_console_task_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -132,7 +145,7 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osDelay(1000);
   }
   /* USER CODE END StartDefaultTask */
 }
