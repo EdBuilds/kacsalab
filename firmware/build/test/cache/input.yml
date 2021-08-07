@@ -24,6 +24,7 @@
   :support: []
   :include:
   - central_control_system/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2
+  - libcommon/**
   :test_toolchain_include: []
   :release_toolchain_include: []
 :files:

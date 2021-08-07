@@ -27,6 +27,8 @@
 #include "stlink_uart_config.h"
 #include "bmmcp_config.h"
 #include "bmmcp/bmmcp_common.h"
+#include "cmsis_os2.h"
+#include "task.h"
 
 /* USER CODE END Includes */
 
@@ -261,6 +263,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	if (STLINK_USART_handle.husart.Instance == huart->Instance) {
 		BMMCP_HWDataReceivedIT(&BMMCP_handle);
 	}
+}
+
+void vApplicationStackOverflowHook (TaskHandle_t xTask, signed char *pcTaskName)
+{
+	pcTaskName[0] = 'a';
 }
 /* USER CODE BEGIN 1 */
 

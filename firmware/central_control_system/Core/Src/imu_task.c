@@ -15,7 +15,7 @@
 #include "shared_data.h"
 #include "frame_state_object.h"
 
-#define IMU_TASK_QUEUE_LENGTH (3U)
+#define IMU_TASK_QUEUE_LENGTH (30U)
 #define IMU_MEAS_AX_NUM (3U)
 
 typedef enum {
@@ -39,14 +39,18 @@ void dik() {
 void IMU_int1_handler(BaseType_t * higher_prio_task_woken){
 	IMU_TASK_command_t temp_command = IMU_TASK_new_acc_meas;
 	if (IMU_task_queue != NULL) {
-		xQueueSendFromISR(IMU_task_queue, &temp_command, higher_prio_task_woken);
+		if (xQueueSendFromISR(IMU_task_queue, &temp_command, higher_prio_task_woken) != pdPASS) {
+			dik();
+		}
 	}
 }
 
 void IMU_int2_handler(BaseType_t * higher_prio_task_woken){
 	IMU_TASK_command_t temp_command = IMU_TASK_new_gyro_meas;
 	if (IMU_task_queue != NULL) {
-		xQueueSendFromISR(IMU_task_queue, &temp_command, higher_prio_task_woken);
+		if (xQueueSendFromISR(IMU_task_queue, &temp_command, higher_prio_task_woken) != pdPASS) {
+			dik();
+		}
 	}
 }
 static float raw_gyro_to_radps(int16_t raw_gyro);
@@ -160,11 +164,11 @@ void StartImuTask(void *argument)
 	  {dik();
 	  }
 
-	  if (LSM6DS3_ACC_GYRO_W_ODR_G( (void *)&hi2c1, LSM6DS3_ACC_GYRO_ODR_G_833Hz) == MEMS_ERROR)
+	  if (LSM6DS3_ACC_GYRO_W_ODR_G( (void *)&hi2c1, LSM6DS3_ACC_GYRO_ODR_G_52Hz) == MEMS_ERROR)
 	  {
 		  dik();
 	  }
-	  if ( LSM6DS3_ACC_GYRO_W_ODR_XL( (void *)&hi2c1, LSM6DS3_ACC_GYRO_ODR_XL_833Hz ) == MEMS_ERROR )
+	  if ( LSM6DS3_ACC_GYRO_W_ODR_XL( (void *)&hi2c1, LSM6DS3_ACC_GYRO_ODR_XL_52Hz ) == MEMS_ERROR )
 	  {
 		  dik();
 	  }
@@ -238,6 +242,8 @@ void StartImuTask(void *argument)
 
     	  }
 
+      } else {
+    	  //failed to get data from queue
       }
 	  /* Read output registers from LSM6DS3_ACC_GYRO_OUTX_L_XL to LSM6DS3_ACC_GYRO_OUTZ_H_XL. */
   }

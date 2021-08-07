@@ -30,6 +30,7 @@
     - central_control_system/Core/Inc/**
   :include:
     - central_control_system/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2
+    - libcommon/**
 
 :defines:
   # in order to add common defines:

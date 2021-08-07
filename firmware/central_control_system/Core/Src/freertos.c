@@ -30,6 +30,7 @@
 #include "bmmcp_master_task.h"
 #include "command_console_task.h"
 #include "shared_task_resources.h"
+#include "object_manager.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,35 +50,56 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+#define IMU_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 100)
 osThreadId_t imu_task_handle;
+uint8_t imu_task_cb[sizeof(StaticTask_t)] = {0};
+uint8_t imu_task_stack[IMU_TASK_STACK_SIZE * 4] = {0};
 const osThreadAttr_t imu_task_attributes = {
   .name = "imuTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime,
+  .priority = (osPriority_t) osPriorityRealtime1,
+  .cb_mem = imu_task_cb,
+  .cb_size = sizeof(StaticTask_t),
+  .stack_mem = imu_task_stack,
+  .stack_size = IMU_TASK_STACK_SIZE * 4,
 };
 
 osThreadId_t bmmcp_master_task_handle;
+uint8_t bmmcp_master_task_cb[sizeof(StaticTask_t)] = {0};
+uint8_t bmmcp_master_task_stack[configMINIMAL_STACK_SIZE * 4] = {0};
 const osThreadAttr_t bmmcp_master_task_attributes = {
-  .name = "bmmcp_master_task",
-  .stack_size = 128 * 4,
+  .name = "bmmcp_task",
   .priority = (osPriority_t) osPriorityRealtime,
+  .cb_mem = bmmcp_master_task_cb,
+  .cb_size = sizeof(StaticTask_t),
+  .stack_mem = bmmcp_master_task_stack,
+  .stack_size = configMINIMAL_STACK_SIZE * 4,
 };
 
+#define COMMAND_CONSOLE_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 100)
 osThreadId_t command_console_task_handle;
+uint8_t command_console_task_cb[sizeof(StaticTask_t)] = {0};
+uint8_t command_console_task_stack[COMMAND_CONSOLE_TASK_STACK_SIZE * 4] = {0};
 const osThreadAttr_t command_console_task_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .name = "commandCon",
+  .priority = (osPriority_t) osPriorityNormal1,
+  .cb_mem = command_console_task_cb,
+  .cb_size = sizeof(StaticTask_t),
+  .stack_mem = command_console_task_stack,
+  .stack_size = COMMAND_CONSOLE_TASK_STACK_SIZE * 4,
 };
 
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
+uint8_t default_task_cb[sizeof(StaticTask_t)] = {0};
+uint8_t default_task_stack[configMINIMAL_STACK_SIZE * 4] = {0};
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
+  .cb_mem = default_task_cb,
+  .cb_size = sizeof(StaticTask_t),
+  .stack_mem = default_task_stack,
+  .stack_size = configMINIMAL_STACK_SIZE * 4,
 };
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -113,6 +135,7 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
 	SHARED_TASK_init();
+	OBJECT_MANAGER_init();
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */

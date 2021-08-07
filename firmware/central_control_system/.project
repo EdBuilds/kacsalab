@@ -36,6 +36,11 @@
 			<locationURI>WORKSPACE_LOC/libcommon/bmmcp</locationURI>
 		</link>
 		<link>
+			<name>Core/errors</name>
+			<type>2</type>
+			<location>/home/tamas/general/kacsalab/firmware/libcommon/errors</location>
+		</link>
+		<link>
 			<name>Core/test</name>
 			<type>2</type>
 			<location>/home/tamas/general/kacsalab/firmware/central_control_system/Core/test</location>

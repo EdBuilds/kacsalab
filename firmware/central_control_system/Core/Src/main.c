@@ -26,6 +26,7 @@
 #include "stlink_uart_config.h"
 #include "bmmcp/bmmcp_common.h"
 #include "bmmcp_config.h"
+#include "object_manager.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
