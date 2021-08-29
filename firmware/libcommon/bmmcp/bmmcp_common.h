@@ -12,7 +12,7 @@
 #include "stdbool.h"
 #include "bmmcp/bmmcp_packet.h"
 
-#define BMMCP_PACKET_LENGTH (3U)
+#define BMMCP_PACKET_LENGTH (7U)
 
 typedef bool (* BMMCP_send_packet_func_t ) (void * HW_handle, void *txBuffer, uint16_t txDataLength);
 typedef void (* BMMCP_receive_packet_func_t ) (void * HW_handle, void *rxBuffer, uint16_t rxDataLength);
@@ -26,6 +26,7 @@ typedef enum {
 	BMMCP_buffer_short,
 	BMMCP_unexpected_value,
 }BMMCP_return_t;
+
 typedef enum {
 	BMMCP_empty = 0,
 	BMMCP_write_lock,
@@ -48,6 +49,7 @@ typedef struct {
 BMMCP_return_t BMMCP_read_msg(BMMCP_handle_t * bmmcp_handle, BMMCP_universal_packet_t * received_packet);
 BMMCP_return_t BMMCP_write_msg(BMMCP_handle_t * bmmcp_handle, BMMCP_universal_packet_t * packet_to_send);
 BMMCP_return_t BMMCP_init(BMMCP_handle_t * bmmcp_handle, BMMCP_receive_callback_func_t receive_callback_func);
+float BMMCP_velocity_to_si(int16_t vel);
 
 // Interrupt handlers
 void BMMCP_HWDataReceivedIT(BMMCP_handle_t * bmmcp_handle);

@@ -56,6 +56,14 @@ void DebugMon_Handler(void);
 void EXTI0_IRQHandler(void);
 void EXTI1_IRQHandler(void);
 void TIM2_IRQHandler(void);
+void CAN_TX_IRQHandler(void);
+void CAN_RX0_IRQHandler(void);
+void CAN_RX1_IRQHandler(void);
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
+void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */

@@ -6,6 +6,8 @@
   Unity.CurrentTestName = #TestFunc; \
   Unity.CurrentTestLineNumber = TestLineNum; \
   Unity.NumberOfTests++; \
+  CMock_Init(); \
+  UNITY_CLR_DETAILS(); \
   if (TEST_PROTECT()) \
   { \
       setUp(); \
@@ -14,7 +16,9 @@
   if (TEST_PROTECT()) \
   { \
     tearDown(); \
+    CMock_Verify(); \
   } \
+  CMock_Destroy(); \
   UnityConcludeTest(); \
 }
 
@@ -23,10 +27,18 @@
 #define UNITY_INCLUDE_SETUP_STUBS
 #endif
 #include "unity.h"
+#include "cmock.h"
 #ifndef UNITY_EXCLUDE_SETJMP_H
 #include <setjmp.h>
 #endif
 #include <stdio.h>
+#include "mock_cmsis_os2.h"
+#include "mock_bmmcp_common.h"
+#include "mock_logging_config.h"
+#include "mock_logging.h"
+#include "mock_log_interface_config.h"
+#include "mock_shared_task_resources.h"
+#include "mock_motor_common_types.h"
 
 int GlobalExpectCount;
 int GlobalVerifyOrder;
@@ -35,9 +47,45 @@ char* GlobalOrderError;
 /*=======External Functions This Runner Calls=====*/
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_angles_set_home_normal(void);
-extern void test_angles_set_home_bad_output(void);
+extern void test_startup_process(void);
+extern void test_other_states_from_unknown_state(void);
+extern void test_motor_fault(void);
 
+
+/*=======Mock Management=====*/
+static void CMock_Init(void)
+{
+  GlobalExpectCount = 0;
+  GlobalVerifyOrder = 0;
+  GlobalOrderError = NULL;
+  mock_cmsis_os2_Init();
+  mock_bmmcp_common_Init();
+  mock_logging_config_Init();
+  mock_logging_Init();
+  mock_log_interface_config_Init();
+  mock_shared_task_resources_Init();
+  mock_motor_common_types_Init();
+}
+static void CMock_Verify(void)
+{
+  mock_cmsis_os2_Verify();
+  mock_bmmcp_common_Verify();
+  mock_logging_config_Verify();
+  mock_logging_Verify();
+  mock_log_interface_config_Verify();
+  mock_shared_task_resources_Verify();
+  mock_motor_common_types_Verify();
+}
+static void CMock_Destroy(void)
+{
+  mock_cmsis_os2_Destroy();
+  mock_bmmcp_common_Destroy();
+  mock_logging_config_Destroy();
+  mock_logging_Destroy();
+  mock_log_interface_config_Destroy();
+  mock_shared_task_resources_Destroy();
+  mock_motor_common_types_Destroy();
+}
 
 /*=======Suite Setup=====*/
 static void suite_setup(void)
@@ -61,7 +109,10 @@ static int suite_teardown(int num_failures)
 void resetTest(void);
 void resetTest(void)
 {
+  CMock_Verify();
+  CMock_Destroy();
   tearDown();
+  CMock_Init();
   setUp();
 }
 
@@ -71,8 +122,10 @@ int main(void)
 {
   suite_setup();
   UnityBegin("test_motor_interface.c");
-  RUN_TEST(test_angles_set_home_normal, 4);
-  RUN_TEST(test_angles_set_home_bad_output, 9);
+  RUN_TEST(test_startup_process, 177);
+  RUN_TEST(test_other_states_from_unknown_state, 229);
+  RUN_TEST(test_motor_fault, 234);
 
+  CMock_Guts_MemFreeFinal();
   return suite_teardown(UnityEnd());
 }

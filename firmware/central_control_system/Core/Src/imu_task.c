@@ -14,6 +14,7 @@
 #include "stdbool.h"
 #include "shared_data.h"
 #include "frame_state_object.h"
+#include "logging.h"
 
 #define IMU_TASK_QUEUE_LENGTH (30U)
 #define IMU_MEAS_AX_NUM (3U)
@@ -30,17 +31,18 @@ I2C_HandleTypeDef hi2c1;
 static QueueHandle_t IMU_task_queue = NULL;
 static bool IMU_TASK_acc_data_received = false;
 static bool IMU_TASK_gyro_data_received = false;
-
+static bool IMU_TASK_message_dropped = false;
 void dik() {
 	volatile uint8_t ouch = 1;
 	++ouch;
+    LogError("IMU message failed to transmit/receive");
 }
 
 void IMU_int1_handler(BaseType_t * higher_prio_task_woken){
 	IMU_TASK_command_t temp_command = IMU_TASK_new_acc_meas;
 	if (IMU_task_queue != NULL) {
 		if (xQueueSendFromISR(IMU_task_queue, &temp_command, higher_prio_task_woken) != pdPASS) {
-			dik();
+		  IMU_TASK_message_dropped = true;
 		}
 	}
 }
@@ -49,7 +51,7 @@ void IMU_int2_handler(BaseType_t * higher_prio_task_woken){
 	IMU_TASK_command_t temp_command = IMU_TASK_new_gyro_meas;
 	if (IMU_task_queue != NULL) {
 		if (xQueueSendFromISR(IMU_task_queue, &temp_command, higher_prio_task_woken) != pdPASS) {
-			dik();
+		    IMU_TASK_message_dropped = true;
 		}
 	}
 }
@@ -164,11 +166,11 @@ void StartImuTask(void *argument)
 	  {dik();
 	  }
 
-	  if (LSM6DS3_ACC_GYRO_W_ODR_G( (void *)&hi2c1, LSM6DS3_ACC_GYRO_ODR_G_52Hz) == MEMS_ERROR)
+	  if (LSM6DS3_ACC_GYRO_W_ODR_G( (void *)&hi2c1, LSM6DS3_ACC_GYRO_ODR_G_104Hz) == MEMS_ERROR)
 	  {
 		  dik();
 	  }
-	  if ( LSM6DS3_ACC_GYRO_W_ODR_XL( (void *)&hi2c1, LSM6DS3_ACC_GYRO_ODR_XL_52Hz ) == MEMS_ERROR )
+	  if ( LSM6DS3_ACC_GYRO_W_ODR_XL( (void *)&hi2c1, LSM6DS3_ACC_GYRO_ODR_XL_104Hz ) == MEMS_ERROR )
 	  {
 		  dik();
 	  }
@@ -191,12 +193,15 @@ void StartImuTask(void *argument)
 
   for(;;)
   {
+	  if (IMU_TASK_message_dropped) {
+		  IMU_TASK_message_dropped = false;
+		  LogWarn("IMU message dropped!");
+	  }
       if( xQueueReceive( IMU_task_queue,
                          &received_command,
                          portMAX_DELAY ) == pdPASS )
       {
     	  uint8_t regValue[6] = {0, 0, 0, 0, 0, 0};
-
     	  switch (received_command) {
     	  	  case IMU_TASK_new_acc_meas:
     		      if ( LSM6DS3_ACC_GYRO_GetRawAccData( (void *)&hi2c1, regValue ) == MEMS_ERROR )
@@ -244,6 +249,7 @@ void StartImuTask(void *argument)
 
       } else {
     	  //failed to get data from queue
+		  LogWarn("Failed to get data from IMU queue");
       }
 	  /* Read output registers from LSM6DS3_ACC_GYRO_OUTX_L_XL to LSM6DS3_ACC_GYRO_OUTZ_H_XL. */
   }

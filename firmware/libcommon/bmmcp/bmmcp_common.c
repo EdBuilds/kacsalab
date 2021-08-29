@@ -8,7 +8,8 @@
 #include "string.h"
 
 #define BMMCP_HEADER_SIZE (1U)
-#define BMMCP_PAYLOAD_SIZE (BMMCP_PACKET_LENGTH - BMMCP_HEADER_SIZE)
+#define BMMCP_COMMAND_SIZE (1U)
+#define BMMCP_PAYLOAD_SIZE (BMMCP_PACKET_LENGTH - BMMCP_HEADER_SIZE - BMMCP_COMMAND_SIZE)
 static BMMCP_return_t BMMCP_unpack_packet(const uint8_t * rxbuffer, uint8_t buffer_length, BMMCP_universal_packet_t * packet);
 static BMMCP_return_t BMMCP_pack_packet(uint8_t * txbuffer, uint8_t buffer_length, const BMMCP_universal_packet_t * packet);
 
@@ -18,9 +19,13 @@ static BMMCP_return_t BMMCP_unpack_packet(const uint8_t * rxbuffer, uint8_t buff
 	if (buffer_length < BMMCP_PACKET_LENGTH) {
 		result = BMMCP_buffer_short;
 	} else {
-		const uint8_t * command_buffer = rxbuffer;
-		const uint8_t * payload_buffer = rxbuffer + BMMCP_HEADER_SIZE;
-		(void) memcpy(&(packet->command), command_buffer, BMMCP_HEADER_SIZE);
+
+		const uint8_t * header_buffer = rxbuffer;
+		const uint8_t * command_buffer = rxbuffer + BMMCP_HEADER_SIZE;
+		const uint8_t * payload_buffer = rxbuffer + BMMCP_HEADER_SIZE + BMMCP_COMMAND_SIZE;
+
+		(void) memcpy(&(packet->id), header_buffer, BMMCP_HEADER_SIZE);
+		(void) memcpy(&(packet->command), command_buffer, BMMCP_COMMAND_SIZE);
 		(void) memcpy(&(packet->data), payload_buffer, BMMCP_PAYLOAD_SIZE);
 	}
 	return result;
@@ -32,9 +37,12 @@ static BMMCP_return_t BMMCP_pack_packet(uint8_t * txbuffer, uint8_t buffer_lengt
 	if (buffer_length < BMMCP_PACKET_LENGTH) {
 		result = BMMCP_buffer_short;
 	} else {
-		uint8_t * command_buffer = txbuffer;
-		uint8_t * payload_buffer = txbuffer + BMMCP_HEADER_SIZE;
-		(void) memcpy(command_buffer, &(packet->command), BMMCP_HEADER_SIZE);
+
+		uint8_t * header_buffer = txbuffer;
+		uint8_t * command_buffer = txbuffer + BMMCP_HEADER_SIZE;
+		uint8_t * payload_buffer = txbuffer + BMMCP_HEADER_SIZE + BMMCP_COMMAND_SIZE;
+		(void) memcpy(header_buffer, &(packet->id), BMMCP_HEADER_SIZE);
+		(void) memcpy(command_buffer, &(packet->command), BMMCP_COMMAND_SIZE);
 		(void) memcpy(payload_buffer, &(packet->data), BMMCP_PAYLOAD_SIZE);
 	}
 	return result;
@@ -46,9 +54,9 @@ BMMCP_return_t BMMCP_read_msg(BMMCP_handle_t * bmmcp_handle, BMMCP_universal_pac
 	switch (bmmcp_handle->receive_buffer_lock) {
 		case BMMCP_full:
 			bmmcp_handle->receive_buffer_lock = BMMCP_read_lock;
-			result = BMMCP_unpack_packet(bmmcp_handle->receive_buffer, BMMCP_PACKET_LENGTH, received_packet);
-			bmmcp_handle->receive_buffer_lock = BMMCP_write_lock;
 			bmmcp_handle->receive_packet_func(bmmcp_handle->HW_if, bmmcp_handle->receive_buffer, BMMCP_PACKET_LENGTH);
+			bmmcp_handle->receive_buffer_lock = BMMCP_write_lock;
+			result = BMMCP_unpack_packet(bmmcp_handle->receive_buffer, BMMCP_PACKET_LENGTH, received_packet);
 		break;
 
 		case BMMCP_write_lock:
@@ -113,7 +121,12 @@ BMMCP_return_t BMMCP_init(BMMCP_handle_t * bmmcp_handle, BMMCP_receive_callback_
 
     bmmcp_handle->init_hw_func(bmmcp_handle->HW_if);
 	bmmcp_handle->receive_buffer_lock = BMMCP_write_lock;
-	bmmcp_handle->receive_packet_func(bmmcp_handle->HW_if, bmmcp_handle->receive_buffer, BMMCP_PACKET_LENGTH);
+	//bmmcp_handle->receive_packet_func(bmmcp_handle->HW_if, bmmcp_handle->receive_buffer, BMMCP_PACKET_LENGTH);
 	bmmcp_handle->receive_callback_func = receive_callback_func;
 	return BMMCP_ok;
+}
+
+float BMMCP_velocity_to_si(int16_t vel){
+	//TODO implement the conversion
+	return (float)vel;
 }

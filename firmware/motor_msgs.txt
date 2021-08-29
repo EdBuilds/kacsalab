@@ -1,0 +1,4 @@
+telemetry idle:
+t0206070000000000
+command ack:
+t02060a0000000000

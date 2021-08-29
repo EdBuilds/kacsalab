@@ -17,6 +17,8 @@ typedef enum {
 	ERRORS_not_available,
 	ERRORS_generic_error,
 	ERRORS_os_error,
+	ERRORS_fault,
+	ERRORS_timeout,
 	ERRORS_not_implemented,
 }ERRORS_return_t;
 

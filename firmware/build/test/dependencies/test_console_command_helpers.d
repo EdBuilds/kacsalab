@@ -5,4 +5,5 @@ build/test/out/c/test_console_command_helpers.o: \
  build/test/mocks/mock_object_manager.h \
  central_control_system/Core/Inc/object_manager.h \
  libcommon/errors/errors.h \
- central_control_system/Core/Inc/console_command_helpers.h
+ central_control_system/Core/Inc/console_command_helpers.h \
+ central_control_system/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h

@@ -15,14 +15,19 @@
 #include "console_command_helpers.h"
 #include "stdlib.h"
 #include "cmsis_os2.h"
+#include "shared_task_resources.h"
+#include "motor_object.h"
 
-#define COMMAND_NUM (3U)
-#define GETOBJ_COMMAND_HELP_STRING_BUF_LEN (512U)
+#define COMMAND_NUM (5U)
+#define GETOBJ_COMMAND_HELP_STRING_BUF_LEN (212U)
 #define MAX_THREAD_NUM (10U)
 
 static BaseType_t CONSOLE_COMMAND_reboot(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString);
 static BaseType_t CONSOLE_COMMAND_get_object(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString);
 static BaseType_t CONSOLE_COMMAND_os_thread_stats(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString);
+static BaseType_t CONSOLE_COMMAND_bmmcp_send(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString);
+static BaseType_t CONSOLE_COMMAND_motor_test(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString);
+
 static char getobj_command_help_buf[GETOBJ_COMMAND_HELP_STRING_BUF_LEN] = {0};
 CLI_Command_Definition_t commands[COMMAND_NUM] =
 {
@@ -44,6 +49,19 @@ CLI_Command_Definition_t commands[COMMAND_NUM] =
 				.cExpectedNumberOfParameters = 0,
 				.pxCommandInterpreter = &CONSOLE_COMMAND_os_thread_stats
 		},
+		{
+				.pcCommand = "bmmcp",
+				.pcHelpString = "bmmcp:\n Send a motor control message\r\n\r\n",
+				.cExpectedNumberOfParameters = 0,
+				.pxCommandInterpreter = &CONSOLE_COMMAND_bmmcp_send
+		},
+		{
+				.pcCommand = "mt",
+				.pcHelpString = "mt [id]:\n Motor Test, goes through the process of starting, running and stopping the motor\r\n\r\n",
+				.cExpectedNumberOfParameters = 1,
+				.pxCommandInterpreter = &CONSOLE_COMMAND_motor_test
+		},
+
 };
 ERRORS_return_t register_console_commands(void)
 {
@@ -127,5 +145,74 @@ static BaseType_t CONSOLE_COMMAND_os_thread_stats(char *pcWriteBuffer, size_t xW
 		used_buffer_space += snprintf( pcWriteBuffer+used_buffer_space, xWriteBufferLen-used_buffer_space, "%d", osThreadGetStackSpace(thread_id));
 		used_buffer_space += snprintf( pcWriteBuffer+used_buffer_space, xWriteBufferLen-used_buffer_space, "\n");
 	}
+	return pdFALSE;
+}
+
+static BaseType_t CONSOLE_COMMAND_bmmcp_send(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString)
+{
+
+	size_t used_buffer_space = 0;
+	BMMCP_master_task_msg_t message_to_send = {
+			.variant = BMMCP_MASTER_TASK_packet_send,
+			.payload = {.packet = {
+					.id = 1,
+					.command = BMMCP_start_motor,
+			},},
+	};
+
+	if (osMessageQueuePut(SHARED_TASK_get_bmmcp_master_queue(), &message_to_send, 0, 0) != osOK) {
+		used_buffer_space += snprintf( pcWriteBuffer+used_buffer_space, xWriteBufferLen-used_buffer_space, "Could not send message");
+	} else {
+		used_buffer_space += snprintf( pcWriteBuffer+used_buffer_space, xWriteBufferLen-used_buffer_space, "BMMCP message queued");
+	}
+	return pdFALSE;
+}
+
+static BaseType_t CONSOLE_COMMAND_motor_test(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString)
+{
+
+	char *pcParameter1;
+	BaseType_t xParameter1StringLength;
+	size_t used_buffer_space = 0;
+
+    /* Obtain the name of the source file, and the length of its name, from
+    the command string. The name of the source file is the first parameter. */
+    pcParameter1 = FreeRTOS_CLIGetParameter
+	                        (
+	                          /* The command string itself. */
+	                          pcCommandString,
+	                          /* Return the first parameter. */
+	                          1,
+	                          /* Store the parameter string length. */
+	                          &xParameter1StringLength
+	                        );
+
+    /* Terminate both file names. */
+    pcParameter1[ xParameter1StringLength ] = 0x00;
+    int32_t idx = strtol(pcParameter1, (char **)NULL, 10) - 1;
+    if (idx < MOTOR_NUM) {
+    	if (MOTOR_OBJ_take(idx) == ERRORS_ok) {
+    			if (MOTOR_OBJ_start(idx, osWaitForever) == ERRORS_ok) {
+    				if (MOTOR_OBJ_stop(idx, osWaitForever) == ERRORS_ok) {
+
+    				} else {
+    					used_buffer_space += snprintf( pcWriteBuffer+used_buffer_space, xWriteBufferLen-used_buffer_space, "Could not stop the motor");
+    				}
+    			} else {
+    				used_buffer_space += snprintf( pcWriteBuffer+used_buffer_space, xWriteBufferLen-used_buffer_space, "Could not start the motor");
+
+    			}
+    		if (MOTOR_OBJ_release(idx) != ERRORS_ok) {
+    			used_buffer_space += snprintf( pcWriteBuffer+used_buffer_space, xWriteBufferLen-used_buffer_space, "Could not release the motor");
+
+    		}
+
+
+    	} else {
+    	used_buffer_space += snprintf( pcWriteBuffer+used_buffer_space, xWriteBufferLen-used_buffer_space, "Another task owns the motor");
+    	}
+    } else {
+    	used_buffer_space += snprintf( pcWriteBuffer+used_buffer_space, xWriteBufferLen-used_buffer_space, "motor id not supported");
+    }
 	return pdFALSE;
 }

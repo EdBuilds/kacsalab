@@ -37,6 +37,28 @@ typedef const char* (* CMOCK_OBJECT_MANAGER_get_name_CALLBACK)(uint8_t obj_idx, 
 void OBJECT_MANAGER_get_name_StubWithCallback(CMOCK_OBJECT_MANAGER_get_name_CALLBACK Callback);
 #define OBJECT_MANAGER_get_name_IgnoreArg_obj_idx() OBJECT_MANAGER_get_name_CMockIgnoreArg_obj_idx(__LINE__)
 void OBJECT_MANAGER_get_name_CMockIgnoreArg_obj_idx(UNITY_LINE_TYPE cmock_line);
+#define OBJECT_MANAGER_print_state_IgnoreAndReturn(cmock_retval) OBJECT_MANAGER_print_state_CMockIgnoreAndReturn(__LINE__, cmock_retval)
+void OBJECT_MANAGER_print_state_CMockIgnoreAndReturn(UNITY_LINE_TYPE cmock_line, ERRORS_return_t cmock_to_return);
+#define OBJECT_MANAGER_print_state_ExpectAndReturn(obj_idx, buffer, buffer_len, used_buffer_space, cmock_retval) OBJECT_MANAGER_print_state_CMockExpectAndReturn(__LINE__, obj_idx, buffer, buffer_len, used_buffer_space, cmock_retval)
+void OBJECT_MANAGER_print_state_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, uint8_t obj_idx, char* buffer, size_t buffer_len, size_t* used_buffer_space, ERRORS_return_t cmock_to_return);
+typedef ERRORS_return_t (* CMOCK_OBJECT_MANAGER_print_state_CALLBACK)(uint8_t obj_idx, char* buffer, size_t buffer_len, size_t* used_buffer_space, int cmock_num_calls);
+void OBJECT_MANAGER_print_state_StubWithCallback(CMOCK_OBJECT_MANAGER_print_state_CALLBACK Callback);
+#define OBJECT_MANAGER_print_state_ReturnThruPtr_buffer(buffer) OBJECT_MANAGER_print_state_CMockReturnMemThruPtr_buffer(__LINE__, buffer, sizeof(*buffer))
+#define OBJECT_MANAGER_print_state_ReturnArrayThruPtr_buffer(buffer, cmock_len) OBJECT_MANAGER_print_state_CMockReturnMemThruPtr_buffer(__LINE__, buffer, (int)(cmock_len * (int)sizeof(*buffer)))
+#define OBJECT_MANAGER_print_state_ReturnMemThruPtr_buffer(buffer, cmock_size) OBJECT_MANAGER_print_state_CMockReturnMemThruPtr_buffer(__LINE__, buffer, cmock_size)
+void OBJECT_MANAGER_print_state_CMockReturnMemThruPtr_buffer(UNITY_LINE_TYPE cmock_line, char* buffer, int cmock_size);
+#define OBJECT_MANAGER_print_state_ReturnThruPtr_used_buffer_space(used_buffer_space) OBJECT_MANAGER_print_state_CMockReturnMemThruPtr_used_buffer_space(__LINE__, used_buffer_space, sizeof(*used_buffer_space))
+#define OBJECT_MANAGER_print_state_ReturnArrayThruPtr_used_buffer_space(used_buffer_space, cmock_len) OBJECT_MANAGER_print_state_CMockReturnMemThruPtr_used_buffer_space(__LINE__, used_buffer_space, (int)(cmock_len * (int)sizeof(*used_buffer_space)))
+#define OBJECT_MANAGER_print_state_ReturnMemThruPtr_used_buffer_space(used_buffer_space, cmock_size) OBJECT_MANAGER_print_state_CMockReturnMemThruPtr_used_buffer_space(__LINE__, used_buffer_space, cmock_size)
+void OBJECT_MANAGER_print_state_CMockReturnMemThruPtr_used_buffer_space(UNITY_LINE_TYPE cmock_line, size_t* used_buffer_space, int cmock_size);
+#define OBJECT_MANAGER_print_state_IgnoreArg_obj_idx() OBJECT_MANAGER_print_state_CMockIgnoreArg_obj_idx(__LINE__)
+void OBJECT_MANAGER_print_state_CMockIgnoreArg_obj_idx(UNITY_LINE_TYPE cmock_line);
+#define OBJECT_MANAGER_print_state_IgnoreArg_buffer() OBJECT_MANAGER_print_state_CMockIgnoreArg_buffer(__LINE__)
+void OBJECT_MANAGER_print_state_CMockIgnoreArg_buffer(UNITY_LINE_TYPE cmock_line);
+#define OBJECT_MANAGER_print_state_IgnoreArg_buffer_len() OBJECT_MANAGER_print_state_CMockIgnoreArg_buffer_len(__LINE__)
+void OBJECT_MANAGER_print_state_CMockIgnoreArg_buffer_len(UNITY_LINE_TYPE cmock_line);
+#define OBJECT_MANAGER_print_state_IgnoreArg_used_buffer_space() OBJECT_MANAGER_print_state_CMockIgnoreArg_used_buffer_space(__LINE__)
+void OBJECT_MANAGER_print_state_CMockIgnoreArg_used_buffer_space(UNITY_LINE_TYPE cmock_line);
 
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__TMS470__)
 #if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ > 6 || (__GNUC_MINOR__ == 6 && __GNUC_PATCHLEVEL__ > 0)))

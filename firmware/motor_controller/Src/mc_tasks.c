@@ -131,7 +131,7 @@ __weak void MCboot( MCI_Handle_t* pMCIList[NBR_OF_MOTORS] )
 #ifdef ASPEP
   ASPEP_start (&aspepOverUartA);
 #elif BMMCP
-  BMMCP_init(&BMMCP_handle);
+  BMMCP_init(&BMMCP_handle, NULL);
 #endif
   /* USER CODE BEGIN MCboot 1 */
 

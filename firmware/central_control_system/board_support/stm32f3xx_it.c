@@ -29,6 +29,7 @@
 #include "bmmcp/bmmcp_common.h"
 #include "cmsis_os2.h"
 #include "task.h"
+#include "can_bmmcp_handle.h"
 
 /* USER CODE END Includes */
 
@@ -64,8 +65,10 @@
 
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef hcan;
 extern STLINK_USART_Handle_t STLINK_USART_handle;
 extern BMMCP_handle_t BMMCP_handle;
+extern CAN_BUS_handle_t CAN_BUS_handle;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -214,6 +217,48 @@ void TIM2_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles CAN TX interrupt.
+  */
+void CAN_TX_IRQHandler(void)
+{
+  /* USER CODE BEGIN CAN_TX_IRQn 0 */
+
+  /* USER CODE END CAN_TX_IRQn 0 */
+  HAL_CAN_IRQHandler(&CAN_BUS_handle.hcan);
+  /* USER CODE BEGIN CAN_TX_IRQn 1 */
+
+  /* USER CODE END CAN_TX_IRQn 1 */
+}
+
+/**
+  * @brief This function handles CAN RX0 interrupt.
+  */
+void CAN_RX0_IRQHandler(void)
+{
+  /* USER CODE BEGIN CAN_RX0_IRQn 0 */
+
+  /* USER CODE END CAN_RX0_IRQn 0 */
+  HAL_CAN_IRQHandler(&CAN_BUS_handle.hcan);
+  /* USER CODE BEGIN CAN_RX0_IRQn 1 */
+
+  /* USER CODE END CAN_RX0_IRQn 1 */
+}
+
+/**
+  * @brief This function handles CAN RX1 interrupt.
+  */
+void CAN_RX1_IRQHandler(void)
+{
+  /* USER CODE BEGIN CAN_RX1_IRQn 0 */
+
+  /* USER CODE END CAN_RX1_IRQn 0 */
+  HAL_CAN_IRQHandler(&CAN_BUS_handle.hcan);
+  /* USER CODE BEGIN CAN_RX1_IRQn 1 */
+
+  /* USER CODE END CAN_RX1_IRQn 1 */
+}
+
+/**
   * @brief This function handles DMA1 channel6 global interrupt.
   */
 void DMA1_Channel6_IRQHandler(void)
@@ -265,9 +310,34 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	}
 }
 
+void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan)
+{
+
+	CAN_BUS_handle_t * bmmcp_can_handle = (CAN_BUS_handle_t *)BMMCP_handle.HW_if;
+	if (bmmcp_can_handle->hcan.Instance == hcan->Instance) {
+		BMMCP_HWDataTransmittedIT(&BMMCP_handle);
+	}
+}
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+
+	CAN_BUS_handle_t * bmmcp_can_handle = (CAN_BUS_handle_t *)BMMCP_handle.HW_if;
+	if (bmmcp_can_handle->hcan.Instance == hcan->Instance) {
+		if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &(bmmcp_can_handle->receive_header), bmmcp_can_handle->receive_data) == HAL_OK) {
+			bmmcp_can_handle->receive_success = true;
+			//TODO: yikes
+		} else {
+			bmmcp_can_handle->receive_success = false;
+
+		}
+		BMMCP_HWDataReceivedIT(&BMMCP_handle);
+	}
+}
+
 void vApplicationStackOverflowHook (TaskHandle_t xTask, signed char *pcTaskName)
 {
-	pcTaskName[0] = 'a';
+	while (true) {}
 }
 /* USER CODE BEGIN 1 */
 

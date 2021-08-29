@@ -8,15 +8,19 @@
 #ifndef BMMCP_BMMCP_PACKET_H_
 #define BMMCP_BMMCP_PACKET_H_
 #include "stdint.h"
+#include "bmmcp/bmmcp_slave_state.h"
 typedef enum {
 	BMMCP_no_command = 0,
-	BMMCP_start_motor = 1,
-	BMMCP_stop_motor = 2,
-	BMMCP_get_state = 3,
-	BMMCP_get_faults = 4,
-	BMMCP_set_current = 5,
-	BMMCP_send_velocity = 6,
-	BMMCP_response = 7,
+	BMMCP_align_motor = 1,
+	BMMCP_start_motor = 2,
+	BMMCP_stop_motor = 3,
+	BMMCP_get_state = 4,
+	BMMCP_get_faults = 5,
+	BMMCP_set_current = 6,
+	BMMCP_telemetry = 7,
+	BMMCP_reset_torque = 8,
+	BMMCP_acknowledge_fault = 9,
+	BMMCP_response = 10,
 }BMMCP_command_t;
 
 typedef enum {
@@ -25,12 +29,17 @@ typedef enum {
 }BMMCP_response_t;
 
 typedef struct {
+    uint16_t velocity;
+    uint16_t current;
+    BMMCP_slave_state_t stm_state;
+}BMMCP_telemetry_payload_t;
+
+typedef struct {
 	uint8_t id;
 	BMMCP_command_t command;
 	union {
-		uint16_t velocity;
+		BMMCP_telemetry_payload_t telemetry;
 		uint16_t current;
-		uint16_t stm_state;
 		BMMCP_response_t command_response;
 	}data;
 }BMMCP_universal_packet_t;

@@ -30,6 +30,10 @@
     - central_control_system/Core/Inc/**
   :include:
     - central_control_system/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2
+    - central_control_system/Middlewares/Third_Party/FreeRTOS/Source/include
+    - central_control_system/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
+    - central_control_system/Middlewares/Third_Party/FreeRTOS-Plus/Source/Utilities/logging/**
+    - central_control_system/board_support/**
     - libcommon/**
 
 :defines:
@@ -94,7 +98,8 @@
   :load_paths:
     - "#{Ceedling.load_path}"
   :enabled:
-    - stdout_pretty_tests_report
+    #- stdout_pretty_tests_report
+    - stdout_gtestlike_tests_report
     - module_generator
     - junit_tests_report
 ...

@@ -31,6 +31,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>mocks</name>
+			<type>2</type>
+			<location>/home/tamas/general/kacsalab/firmware/build/test/mocks</location>
+		</link>
+		<link>
 			<name>Core/bmmcp</name>
 			<type>2</type>
 			<locationURI>WORKSPACE_LOC/libcommon/bmmcp</locationURI>

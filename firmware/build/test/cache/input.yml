@@ -24,6 +24,10 @@
   :support: []
   :include:
   - central_control_system/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2
+  - central_control_system/Middlewares/Third_Party/FreeRTOS/Source/include
+  - central_control_system/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
+  - central_control_system/Middlewares/Third_Party/FreeRTOS-Plus/Source/Utilities/logging/**
+  - central_control_system/board_support/**
   - libcommon/**
   :test_toolchain_include: []
   :release_toolchain_include: []
@@ -213,11 +217,11 @@
   :load_paths:
   - "/var/lib/gems/2.5.0/gems/ceedling-0.28.3/lib/../plugins"
   :enabled:
-  - stdout_pretty_tests_report
+  - stdout_gtestlike_tests_report
   - module_generator
   - junit_tests_report
   :display_raw_test_results: false
-  :stdout_pretty_tests_report_path: "/var/lib/gems/2.5.0/gems/ceedling-0.28.3/lib/../plugins/stdout_pretty_tests_report"
+  :stdout_gtestlike_tests_report_path: "/var/lib/gems/2.5.0/gems/ceedling-0.28.3/lib/../plugins/stdout_gtestlike_tests_report"
   :module_generator_path: "/var/lib/gems/2.5.0/gems/ceedling-0.28.3/lib/../plugins/module_generator"
   :junit_tests_report_path: "/var/lib/gems/2.5.0/gems/ceedling-0.28.3/lib/../plugins/junit_tests_report"
 :module_generator:

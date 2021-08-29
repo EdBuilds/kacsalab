@@ -7,8 +7,10 @@
 
 #ifndef INC_BMMCP_MASTER_TASK_H_
 #define INC_BMMCP_MASTER_TASK_H_
-
-
+#include "stdbool.h"
+typedef struct {
+	bool debugging;
+}BMMCP_MASTER_task_arg_t;
 void start_bmmcp_master_task(void *argument);
 
 

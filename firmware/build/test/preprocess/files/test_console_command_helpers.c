@@ -18,10 +18,6 @@ void test_getobj_helper_string_build(void)
 
  CC_HELPER_build_getobj_command_help(test_getobj_command_help_buf, (512));
 
- UnityAssertEqualString((const char*)(("getobj [IDX]: \nPrints the state of an object.\nAvailable objects:\n  0: Motor\n  1: Frame\n")), (const char*)((test_getobj_command_help_buf)), (
 
-((void *)0)
-
-), (UNITY_UINT)(22));
 
 }

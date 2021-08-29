@@ -1,0 +1,10 @@
+build/test/out/c/mock_shared_task_resources.o: \
+ build/test/mocks/mock_shared_task_resources.c \
+ /var/lib/gems/2.5.0/gems/ceedling-0.28.3/vendor/unity/src/unity.h \
+ /var/lib/gems/2.5.0/gems/ceedling-0.28.3/vendor/unity/src/unity_internals.h \
+ /var/lib/gems/2.5.0/gems/ceedling-0.28.3/vendor/cmock/src/cmock.h \
+ /var/lib/gems/2.5.0/gems/ceedling-0.28.3/vendor/cmock/src/cmock_internals.h \
+ build/test/mocks/mock_shared_task_resources.h \
+ central_control_system/Core/Inc/shared_task_resources.h \
+ central_control_system/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
+ libcommon/bmmcp/bmmcp_packet.h libcommon/bmmcp/bmmcp_slave_state.h

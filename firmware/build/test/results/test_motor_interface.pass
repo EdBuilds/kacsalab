@@ -3,18 +3,21 @@
   :path: central_control_system/Core/test
   :file: test_motor_interface.c
 :successes:
-- :test: test_angles_set_home_normal
-  :line: 4
+- :test: test_startup_process
+  :line: 177
   :message: ''
-- :test: test_angles_set_home_bad_output
-  :line: 9
+- :test: test_other_states_from_unknown_state
+  :line: 229
+  :message: ''
+- :test: test_motor_fault
+  :line: 234
   :message: ''
 :failures: []
 :ignores: []
 :counts:
-  :total: 2
-  :passed: 2
+  :total: 3
+  :passed: 3
   :failed: 0
   :ignored: 0
 :stdout: []
-:time: 0.0011308789999020519
+:time: 0.0029253810025693383

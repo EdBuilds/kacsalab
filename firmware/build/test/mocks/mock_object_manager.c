@@ -8,7 +8,11 @@
 
 static const char* CMockString_OBJECT_MANAGER_get_name = "OBJECT_MANAGER_get_name";
 static const char* CMockString_OBJECT_MANAGER_init = "OBJECT_MANAGER_init";
+static const char* CMockString_OBJECT_MANAGER_print_state = "OBJECT_MANAGER_print_state";
+static const char* CMockString_buffer = "buffer";
+static const char* CMockString_buffer_len = "buffer_len";
 static const char* CMockString_obj_idx = "obj_idx";
+static const char* CMockString_used_buffer_space = "used_buffer_space";
 
 typedef struct _CMOCK_OBJECT_MANAGER_init_CALL_INSTANCE
 {
@@ -28,6 +32,28 @@ typedef struct _CMOCK_OBJECT_MANAGER_get_name_CALL_INSTANCE
 
 } CMOCK_OBJECT_MANAGER_get_name_CALL_INSTANCE;
 
+typedef struct _CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE
+{
+  UNITY_LINE_TYPE LineNumber;
+  ERRORS_return_t ReturnVal;
+  int CallOrder;
+  uint8_t Expected_obj_idx;
+  char* Expected_buffer;
+  size_t Expected_buffer_len;
+  size_t* Expected_used_buffer_space;
+  int ReturnThruPtr_buffer_Used;
+  char* ReturnThruPtr_buffer_Val;
+  int ReturnThruPtr_buffer_Size;
+  int ReturnThruPtr_used_buffer_space_Used;
+  size_t* ReturnThruPtr_used_buffer_space_Val;
+  int ReturnThruPtr_used_buffer_space_Size;
+  int IgnoreArg_obj_idx;
+  int IgnoreArg_buffer;
+  int IgnoreArg_buffer_len;
+  int IgnoreArg_used_buffer_space;
+
+} CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE;
+
 static struct mock_object_managerInstance
 {
   int OBJECT_MANAGER_init_IgnoreBool;
@@ -40,6 +66,11 @@ static struct mock_object_managerInstance
   CMOCK_OBJECT_MANAGER_get_name_CALLBACK OBJECT_MANAGER_get_name_CallbackFunctionPointer;
   int OBJECT_MANAGER_get_name_CallbackCalls;
   CMOCK_MEM_INDEX_TYPE OBJECT_MANAGER_get_name_CallInstance;
+  int OBJECT_MANAGER_print_state_IgnoreBool;
+  ERRORS_return_t OBJECT_MANAGER_print_state_FinalReturn;
+  CMOCK_OBJECT_MANAGER_print_state_CALLBACK OBJECT_MANAGER_print_state_CallbackFunctionPointer;
+  int OBJECT_MANAGER_print_state_CallbackCalls;
+  CMOCK_MEM_INDEX_TYPE OBJECT_MANAGER_print_state_CallInstance;
 } Mock;
 
 extern jmp_buf AbortFrame;
@@ -61,6 +92,12 @@ void mock_object_manager_Verify(void)
   UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.OBJECT_MANAGER_get_name_CallInstance, cmock_line, CMockStringCalledLess);
   if (Mock.OBJECT_MANAGER_get_name_CallbackFunctionPointer != NULL)
     Mock.OBJECT_MANAGER_get_name_CallInstance = CMOCK_GUTS_NONE;
+  if (Mock.OBJECT_MANAGER_print_state_IgnoreBool)
+    Mock.OBJECT_MANAGER_print_state_CallInstance = CMOCK_GUTS_NONE;
+  UNITY_SET_DETAIL(CMockString_OBJECT_MANAGER_print_state);
+  UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.OBJECT_MANAGER_print_state_CallInstance, cmock_line, CMockStringCalledLess);
+  if (Mock.OBJECT_MANAGER_print_state_CallbackFunctionPointer != NULL)
+    Mock.OBJECT_MANAGER_print_state_CallInstance = CMOCK_GUTS_NONE;
 }
 
 void mock_object_manager_Init(void)
@@ -76,6 +113,8 @@ void mock_object_manager_Destroy(void)
   Mock.OBJECT_MANAGER_init_CallbackCalls = 0;
   Mock.OBJECT_MANAGER_get_name_CallbackFunctionPointer = NULL;
   Mock.OBJECT_MANAGER_get_name_CallbackCalls = 0;
+  Mock.OBJECT_MANAGER_print_state_CallbackFunctionPointer = NULL;
+  Mock.OBJECT_MANAGER_print_state_CallbackCalls = 0;
   GlobalExpectCount = 0;
   GlobalVerifyOrder = 0;
 }
@@ -221,5 +260,160 @@ void OBJECT_MANAGER_get_name_CMockIgnoreArg_obj_idx(UNITY_LINE_TYPE cmock_line)
   CMOCK_OBJECT_MANAGER_get_name_CALL_INSTANCE* cmock_call_instance = (CMOCK_OBJECT_MANAGER_get_name_CALL_INSTANCE*)CMock_Guts_GetAddressFor(CMock_Guts_MemEndOfChain(Mock.OBJECT_MANAGER_get_name_CallInstance));
   UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, CMockStringIgnPreExp);
   cmock_call_instance->IgnoreArg_obj_idx = 1;
+}
+
+ERRORS_return_t OBJECT_MANAGER_print_state(uint8_t obj_idx, char* buffer, size_t buffer_len, size_t* used_buffer_space)
+{
+  UNITY_LINE_TYPE cmock_line = TEST_LINE_NUM;
+  CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE* cmock_call_instance;
+  UNITY_SET_DETAIL(CMockString_OBJECT_MANAGER_print_state);
+  cmock_call_instance = (CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE*)CMock_Guts_GetAddressFor(Mock.OBJECT_MANAGER_print_state_CallInstance);
+  Mock.OBJECT_MANAGER_print_state_CallInstance = CMock_Guts_MemNext(Mock.OBJECT_MANAGER_print_state_CallInstance);
+  if (Mock.OBJECT_MANAGER_print_state_IgnoreBool)
+  {
+    UNITY_CLR_DETAILS();
+    if (cmock_call_instance == NULL)
+      return Mock.OBJECT_MANAGER_print_state_FinalReturn;
+    memcpy(&Mock.OBJECT_MANAGER_print_state_FinalReturn, &cmock_call_instance->ReturnVal, sizeof(ERRORS_return_t));
+    return cmock_call_instance->ReturnVal;
+  }
+  if (Mock.OBJECT_MANAGER_print_state_CallbackFunctionPointer != NULL)
+  {
+    return Mock.OBJECT_MANAGER_print_state_CallbackFunctionPointer(obj_idx, buffer, buffer_len, used_buffer_space, Mock.OBJECT_MANAGER_print_state_CallbackCalls++);
+  }
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, CMockStringCalledMore);
+  cmock_line = cmock_call_instance->LineNumber;
+  if (cmock_call_instance->CallOrder > ++GlobalVerifyOrder)
+    UNITY_TEST_FAIL(cmock_line, CMockStringCalledEarly);
+  if (cmock_call_instance->CallOrder < GlobalVerifyOrder)
+    UNITY_TEST_FAIL(cmock_line, CMockStringCalledLate);
+  if (!cmock_call_instance->IgnoreArg_obj_idx)
+  {
+    UNITY_SET_DETAILS(CMockString_OBJECT_MANAGER_print_state,CMockString_obj_idx);
+    UNITY_TEST_ASSERT_EQUAL_HEX8(cmock_call_instance->Expected_obj_idx, obj_idx, cmock_line, CMockStringMismatch);
+  }
+  if (!cmock_call_instance->IgnoreArg_buffer)
+  {
+    UNITY_SET_DETAILS(CMockString_OBJECT_MANAGER_print_state,CMockString_buffer);
+    UNITY_TEST_ASSERT_EQUAL_STRING(cmock_call_instance->Expected_buffer, buffer, cmock_line, CMockStringMismatch);
+  }
+  if (!cmock_call_instance->IgnoreArg_buffer_len)
+  {
+    UNITY_SET_DETAILS(CMockString_OBJECT_MANAGER_print_state,CMockString_buffer_len);
+    UNITY_TEST_ASSERT_EQUAL_MEMORY((void*)(&cmock_call_instance->Expected_buffer_len), (void*)(&buffer_len), sizeof(size_t), cmock_line, CMockStringMismatch);
+  }
+  if (!cmock_call_instance->IgnoreArg_used_buffer_space)
+  {
+    UNITY_SET_DETAILS(CMockString_OBJECT_MANAGER_print_state,CMockString_used_buffer_space);
+    UNITY_TEST_ASSERT_EQUAL_MEMORY((void*)(cmock_call_instance->Expected_used_buffer_space), (void*)(used_buffer_space), sizeof(size_t), cmock_line, CMockStringMismatch);
+  }
+  if (cmock_call_instance->ReturnThruPtr_buffer_Used)
+  {
+    UNITY_TEST_ASSERT_NOT_NULL(buffer, cmock_line, CMockStringPtrIsNULL);
+    memcpy((void*)buffer, (void*)cmock_call_instance->ReturnThruPtr_buffer_Val,
+      cmock_call_instance->ReturnThruPtr_buffer_Size);
+  }
+  if (cmock_call_instance->ReturnThruPtr_used_buffer_space_Used)
+  {
+    UNITY_TEST_ASSERT_NOT_NULL(used_buffer_space, cmock_line, CMockStringPtrIsNULL);
+    memcpy((void*)used_buffer_space, (void*)cmock_call_instance->ReturnThruPtr_used_buffer_space_Val,
+      cmock_call_instance->ReturnThruPtr_used_buffer_space_Size);
+  }
+  UNITY_CLR_DETAILS();
+  return cmock_call_instance->ReturnVal;
+}
+
+void CMockExpectParameters_OBJECT_MANAGER_print_state(CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE* cmock_call_instance, uint8_t obj_idx, char* buffer, size_t buffer_len, size_t* used_buffer_space)
+{
+  cmock_call_instance->Expected_obj_idx = obj_idx;
+  cmock_call_instance->IgnoreArg_obj_idx = 0;
+  cmock_call_instance->Expected_buffer = buffer;
+  cmock_call_instance->IgnoreArg_buffer = 0;
+  cmock_call_instance->ReturnThruPtr_buffer_Used = 0;
+  memcpy(&cmock_call_instance->Expected_buffer_len, &buffer_len, sizeof(size_t));
+  cmock_call_instance->IgnoreArg_buffer_len = 0;
+  cmock_call_instance->Expected_used_buffer_space = used_buffer_space;
+  cmock_call_instance->IgnoreArg_used_buffer_space = 0;
+  cmock_call_instance->ReturnThruPtr_used_buffer_space_Used = 0;
+}
+
+void OBJECT_MANAGER_print_state_CMockIgnoreAndReturn(UNITY_LINE_TYPE cmock_line, ERRORS_return_t cmock_to_return)
+{
+  CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE));
+  CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE* cmock_call_instance = (CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, CMockStringOutOfMemory);
+  memset(cmock_call_instance, 0, sizeof(*cmock_call_instance));
+  Mock.OBJECT_MANAGER_print_state_CallInstance = CMock_Guts_MemChain(Mock.OBJECT_MANAGER_print_state_CallInstance, cmock_guts_index);
+  Mock.OBJECT_MANAGER_print_state_IgnoreBool = (int)0;
+  cmock_call_instance->LineNumber = cmock_line;
+  cmock_call_instance->ReturnVal = cmock_to_return;
+  Mock.OBJECT_MANAGER_print_state_IgnoreBool = (int)1;
+}
+
+void OBJECT_MANAGER_print_state_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, uint8_t obj_idx, char* buffer, size_t buffer_len, size_t* used_buffer_space, ERRORS_return_t cmock_to_return)
+{
+  CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE));
+  CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE* cmock_call_instance = (CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, CMockStringOutOfMemory);
+  memset(cmock_call_instance, 0, sizeof(*cmock_call_instance));
+  Mock.OBJECT_MANAGER_print_state_CallInstance = CMock_Guts_MemChain(Mock.OBJECT_MANAGER_print_state_CallInstance, cmock_guts_index);
+  Mock.OBJECT_MANAGER_print_state_IgnoreBool = (int)0;
+  cmock_call_instance->LineNumber = cmock_line;
+  cmock_call_instance->CallOrder = ++GlobalExpectCount;
+  CMockExpectParameters_OBJECT_MANAGER_print_state(cmock_call_instance, obj_idx, buffer, buffer_len, used_buffer_space);
+  memcpy(&cmock_call_instance->ReturnVal, &cmock_to_return, sizeof(ERRORS_return_t));
+  UNITY_CLR_DETAILS();
+}
+
+void OBJECT_MANAGER_print_state_StubWithCallback(CMOCK_OBJECT_MANAGER_print_state_CALLBACK Callback)
+{
+  Mock.OBJECT_MANAGER_print_state_IgnoreBool = (int)0;
+  Mock.OBJECT_MANAGER_print_state_CallbackFunctionPointer = Callback;
+}
+
+void OBJECT_MANAGER_print_state_CMockReturnMemThruPtr_buffer(UNITY_LINE_TYPE cmock_line, char* buffer, int cmock_size)
+{
+  CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE* cmock_call_instance = (CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE*)CMock_Guts_GetAddressFor(CMock_Guts_MemEndOfChain(Mock.OBJECT_MANAGER_print_state_CallInstance));
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, CMockStringPtrPreExp);
+  cmock_call_instance->ReturnThruPtr_buffer_Used = 1;
+  cmock_call_instance->ReturnThruPtr_buffer_Val = buffer;
+  cmock_call_instance->ReturnThruPtr_buffer_Size = cmock_size;
+}
+
+void OBJECT_MANAGER_print_state_CMockReturnMemThruPtr_used_buffer_space(UNITY_LINE_TYPE cmock_line, size_t* used_buffer_space, int cmock_size)
+{
+  CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE* cmock_call_instance = (CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE*)CMock_Guts_GetAddressFor(CMock_Guts_MemEndOfChain(Mock.OBJECT_MANAGER_print_state_CallInstance));
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, CMockStringPtrPreExp);
+  cmock_call_instance->ReturnThruPtr_used_buffer_space_Used = 1;
+  cmock_call_instance->ReturnThruPtr_used_buffer_space_Val = used_buffer_space;
+  cmock_call_instance->ReturnThruPtr_used_buffer_space_Size = cmock_size;
+}
+
+void OBJECT_MANAGER_print_state_CMockIgnoreArg_obj_idx(UNITY_LINE_TYPE cmock_line)
+{
+  CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE* cmock_call_instance = (CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE*)CMock_Guts_GetAddressFor(CMock_Guts_MemEndOfChain(Mock.OBJECT_MANAGER_print_state_CallInstance));
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, CMockStringIgnPreExp);
+  cmock_call_instance->IgnoreArg_obj_idx = 1;
+}
+
+void OBJECT_MANAGER_print_state_CMockIgnoreArg_buffer(UNITY_LINE_TYPE cmock_line)
+{
+  CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE* cmock_call_instance = (CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE*)CMock_Guts_GetAddressFor(CMock_Guts_MemEndOfChain(Mock.OBJECT_MANAGER_print_state_CallInstance));
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, CMockStringIgnPreExp);
+  cmock_call_instance->IgnoreArg_buffer = 1;
+}
+
+void OBJECT_MANAGER_print_state_CMockIgnoreArg_buffer_len(UNITY_LINE_TYPE cmock_line)
+{
+  CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE* cmock_call_instance = (CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE*)CMock_Guts_GetAddressFor(CMock_Guts_MemEndOfChain(Mock.OBJECT_MANAGER_print_state_CallInstance));
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, CMockStringIgnPreExp);
+  cmock_call_instance->IgnoreArg_buffer_len = 1;
+}
+
+void OBJECT_MANAGER_print_state_CMockIgnoreArg_used_buffer_space(UNITY_LINE_TYPE cmock_line)
+{
+  CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE* cmock_call_instance = (CMOCK_OBJECT_MANAGER_print_state_CALL_INSTANCE*)CMock_Guts_GetAddressFor(CMock_Guts_MemEndOfChain(Mock.OBJECT_MANAGER_print_state_CallInstance));
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, CMockStringIgnPreExp);
+  cmock_call_instance->IgnoreArg_used_buffer_space = 1;
 }
 

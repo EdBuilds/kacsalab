@@ -1,3 +1,11 @@
 ---
 - unity.h
+- mock_cmsis_os2.h
+- mock_bmmcp_common.h
+- mock_logging_config.h
+- mock_logging.h
+- mock_log_interface_config.h
+- mock_shared_task_resources.h
+- mock_motor_common_types.h
+- motor_interface.h
 - build/temp/_test_motor_interface.c

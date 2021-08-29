@@ -1,0 +1,35 @@
+---
+:source:
+  :path: central_control_system/Core/test
+  :file: test_motor_obj.c
+:successes:
+- :test: test_take_motor_sucsess
+  :line: 50
+  :message: ''
+- :test: test_take_motor_fail
+  :line: 62
+  :message: ''
+- :test: test_release_motor_sucsess
+  :line: 72
+  :message: ''
+- :test: test_release_motor_fail
+  :line: 89
+  :message: ''
+- :test: test_motor_start
+  :line: 99
+  :message: ''
+- :test: test_motor_start_already_started
+  :line: 121
+  :message: ''
+- :test: test_motor_start_fault_during_alignment
+  :line: 134
+  :message: ''
+:failures: []
+:ignores: []
+:counts:
+  :total: 7
+  :passed: 7
+  :failed: 0
+  :ignored: 0
+:stdout: []
+:time: 0.0015635379968443885
