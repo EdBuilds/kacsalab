@@ -168,6 +168,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32g4xx_hal.h"
 
+#define HAL_FDCAN_MODULE_ENABLED
 #if defined(FDCAN1)
 
 /** @addtogroup STM32G4xx_HAL_Driver

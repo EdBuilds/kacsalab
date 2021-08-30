@@ -32,6 +32,7 @@
 #include "mcp_config.h"
 #include "bmmcp_config.h"
 #include "bmmcp/bmmcp_common.h"
+#include "fdcan_bmmcp_handle.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -70,6 +71,9 @@ void USART_IRQHandler(void);
 void HardFault_Handler(void);
 void SysTick_Handler(void);
 void EXTI15_10_IRQHandler (void);
+
+void FDCAN1_IT0_IRQHandler(void);
+void FDCAN1_IT1_IRQHandler(void);
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -332,9 +336,9 @@ void EXTI15_10_IRQHandler (void)
 void FDCAN1_IT0_IRQHandler(void)
 {
   /* USER CODE BEGIN FDCAN1_IT0_IRQn 0 */
-
+	CAN_BUS_handle_t * can_bus_handle = (CAN_BUS_handle_t *)BMMCP_handle.HW_if;
   /* USER CODE END FDCAN1_IT0_IRQn 0 */
-  HAL_FDCAN_IRQHandler(&hfdcan1);
+  HAL_FDCAN_IRQHandler(&(can_bus_handle->hcan));
   /* USER CODE BEGIN FDCAN1_IT0_IRQn 1 */
 
   /* USER CODE END FDCAN1_IT0_IRQn 1 */
@@ -346,9 +350,9 @@ void FDCAN1_IT0_IRQHandler(void)
 void FDCAN1_IT1_IRQHandler(void)
 {
   /* USER CODE BEGIN FDCAN1_IT1_IRQn 0 */
-
+	CAN_BUS_handle_t * can_bus_handle = (CAN_BUS_handle_t *)BMMCP_handle.HW_if;
   /* USER CODE END FDCAN1_IT1_IRQn 0 */
-  HAL_FDCAN_IRQHandler(&hfdcan1);
+  HAL_FDCAN_IRQHandler(&(can_bus_handle->hcan));
   /* USER CODE BEGIN FDCAN1_IT1_IRQn 1 */
 
   /* USER CODE END FDCAN1_IT1_IRQn 1 */

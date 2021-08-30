@@ -134,7 +134,8 @@ __weak void MCboot( MCI_Handle_t* pMCIList[NBR_OF_MOTORS] )
   BMMCP_init(&BMMCP_handle, NULL);
 #endif
   /* USER CODE BEGIN MCboot 1 */
-
+  BMMCP_universal_packet_t packet;
+  BMMCP_write_msg(&BMMCP_handle, &packet);
   /* USER CODE END MCboot 1 */
 
   /**************************************/
