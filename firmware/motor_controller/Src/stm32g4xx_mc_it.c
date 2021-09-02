@@ -357,6 +357,29 @@ void FDCAN1_IT1_IRQHandler(void)
 
   /* USER CODE END FDCAN1_IT1_IRQn 1 */
 }
+void HAL_FDCAN_TxFifoEmptyCallback(FDCAN_HandleTypeDef *hfdcan)
+{
+	CAN_BUS_handle_t * bmmcp_can_handle = (CAN_BUS_handle_t *)BMMCP_handle.HW_if;
+	if (bmmcp_can_handle->hcan.Instance == hfdcan->Instance) {
+		BMMCP_HWDataTransmittedIT(&BMMCP_handle);
+	}
+}
+
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
+{
+
+	CAN_BUS_handle_t * bmmcp_can_handle = (CAN_BUS_handle_t *)BMMCP_handle.HW_if;
+	if (bmmcp_can_handle->hcan.Instance == hfdcan->Instance) {
+		if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &(bmmcp_can_handle->receive_header), bmmcp_can_handle->receive_data) == HAL_OK) {
+			bmmcp_can_handle->receive_success = true;
+			//TODO: yikes
+		} else {
+			bmmcp_can_handle->receive_success = false;
+
+		}
+		BMMCP_HWDataReceivedIT(&BMMCP_handle);
+	}
+}
 /**
   * @}
   */

@@ -9,7 +9,12 @@
 #include "bmmcp_slave.h"
 #include "bmmcp_config.h"
 #include "mc_api.h"
+#include "mc_config.h"
+#include "state_machine.h"
 
+#define TELEMETRY_THRESHOLD (5)
+static uint32_t call_counter = 0;
+//1Khz loop
 void BMMCP_slave_process(void) {
 	BMMCP_universal_packet_t received_packet = {0};
 	BMMCP_universal_packet_t packet_to_send = {0};
@@ -72,8 +77,21 @@ void BMMCP_slave_process(void) {
 			// Error
 		break;
 	}
+	if (call_counter >= TELEMETRY_THRESHOLD) {
+		if (!send_msg) {
+			call_counter = 0;
+			packet_to_send.id = 0;
+			packet_to_send.command = BMMCP_telemetry;
+			packet_to_send.data.telemetry.current = 0;
+			packet_to_send.data.telemetry.stm_state = STM_GetState(&STM[0]);
+			packet_to_send.data.telemetry.velocity = 0;
+			send_msg = true;
+		}
 
+	}
 	if (send_msg) {
 		BMMCP_write_msg(&BMMCP_handle, &packet_to_send);
 	}
+
+	++call_counter;
 }

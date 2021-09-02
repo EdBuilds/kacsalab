@@ -97,7 +97,9 @@ void BMMCP_HWDataReceivedIT(BMMCP_handle_t * bmmcp_handle) {
 	switch (bmmcp_handle->receive_buffer_lock) {
 		case BMMCP_write_lock:
 			bmmcp_handle->receive_buffer_lock = BMMCP_full;
-			bmmcp_handle->receive_callback_func();
+			if (bmmcp_handle->receive_callback_func != NULL) {
+				bmmcp_handle->receive_callback_func();
+			}
 		break;
 		default:
 			// Unexpected value, something's fishy

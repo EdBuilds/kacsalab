@@ -23,8 +23,8 @@ bool FDCAN_BMMCP_send_packet (void *pHandle, void *data, uint16_t length)
 
 	FDCAN_TxHeaderTypeDef header;
 	header.BitRateSwitch = FDCAN_BRS_OFF;
-	header.DataLength = length - 1;
-	header.ErrorStateIndicator = FDCAN_ESI_PASSIVE;
+	header.DataLength = (length - 1) << 16; //fuck this api
+	header.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
 	header.FDFormat = FDCAN_CLASSIC_CAN;
 	header.IdType = FDCAN_STANDARD_ID;
 	header.Identifier = ((uint8_t *)data)[0] | BMMCP_SLAVE_ID;
@@ -54,20 +54,20 @@ void FDCAN_BMMCP_init (void *pHandle)
   can_handle->receive_success = false;
 
   can_handle->hcan.Instance = FDCAN1;
-  can_handle->hcan.Init.ClockDivider = FDCAN_CLOCK_DIV10;
+  can_handle->hcan.Init.ClockDivider = FDCAN_CLOCK_DIV1;
   can_handle->hcan.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
-  can_handle->hcan.Init.Mode = FDCAN_MODE_INTERNAL_LOOPBACK;
+  can_handle->hcan.Init.Mode = FDCAN_MODE_NORMAL;
   can_handle->hcan.Init.AutoRetransmission = DISABLE;
   can_handle->hcan.Init.TransmitPause = DISABLE;
   can_handle->hcan.Init.ProtocolException = DISABLE;
   can_handle->hcan.Init.NominalPrescaler = 1;
   can_handle->hcan.Init.NominalSyncJumpWidth = 1;
-  can_handle->hcan.Init.NominalTimeSeg1 = 14;
-  can_handle->hcan.Init.NominalTimeSeg2 = 2;
+  can_handle->hcan.Init.NominalTimeSeg1 = 6;
+  can_handle->hcan.Init.NominalTimeSeg2 = 1;
   can_handle->hcan.Init.DataPrescaler = 1;
   can_handle->hcan.Init.DataSyncJumpWidth = 1;
-  can_handle->hcan.Init.DataTimeSeg1 = 14;
-  can_handle->hcan.Init.DataTimeSeg2 = 2;
+  can_handle->hcan.Init.DataTimeSeg1 = 6;
+  can_handle->hcan.Init.DataTimeSeg2 = 1;
   can_handle->hcan.Init.StdFiltersNbr = 1;
   can_handle->hcan.Init.ExtFiltersNbr = 0;
   can_handle->hcan.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
@@ -97,3 +97,4 @@ void FDCAN_BMMCP_idle_enable (void *pHWHandle)
 {
 
 }
+

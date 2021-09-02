@@ -197,6 +197,10 @@ static const void* common_state_transition(MOTOR_handle_t *handle, BMMCP_slave_s
 		next_state = (void *)&c_MOTOR_STATE_alignment_in_progress;
 	break;
 
+	case RUN:
+		next_state = (void *)&c_MOTOR_STATE_running;
+	break;
+
 	default:
 	break;
 	}
@@ -298,6 +302,7 @@ ERRORS_return_t MOTOR_get_torque(MOTOR_handle_t *handle, float *torque_nm)
 	return ERRORS_not_implemented;
 }
 
+
 ERRORS_return_t MOTOR_set_torque(MOTOR_handle_t *handle, float torque_nm)
 {
 	ERRORS_return_t result = ERRORS_ok;
@@ -395,8 +400,9 @@ static ERRORS_return_t MOTOR_STATE_start_command_sent_entry(MOTOR_handle_t * han
 }
 static ERRORS_return_t MOTOR_STATE_running_entry(MOTOR_handle_t * handle)
 {
+	const uint32_t running_state_flags = MOTOR_EVENT_FLAG_STARTED | MOTOR_EVENT_FLAG_ALIGNED;
 	ERRORS_return_t result = ERRORS_ok;
-	if ((osEventFlagsSet(handle->event_flag, MOTOR_EVENT_FLAG_STARTED) & MOTOR_EVENT_FLAG_STARTED) == 0) {
+	if ((osEventFlagsSet(handle->event_flag, running_state_flags) & running_state_flags) == 0) {
 		result = ERRORS_os_error;
 	}
 	return result;
@@ -466,9 +472,7 @@ static ERRORS_return_t MOTOR_STATE_idle_aligned_exit(MOTOR_handle_t * handle)
 static ERRORS_return_t MOTOR_STATE_running_exit(MOTOR_handle_t * handle)
 {
 	ERRORS_return_t result = ERRORS_ok;
-	if ((osEventFlagsClear(handle->event_flag, MOTOR_EVENT_FLAG_STARTED) & MOTOR_EVENT_FLAG_STARTED) != 0) {
-		result = ERRORS_os_error;
-	}
+	osEventFlagsClear(handle->event_flag, MOTOR_EVENT_FLAG_STARTED);
 	return result;
 }
 
