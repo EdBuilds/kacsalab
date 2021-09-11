@@ -50,7 +50,7 @@ BMMCP_return_t BMMCP_read_msg(BMMCP_handle_t * bmmcp_handle, BMMCP_universal_pac
 BMMCP_return_t BMMCP_write_msg(BMMCP_handle_t * bmmcp_handle, BMMCP_universal_packet_t * packet_to_send);
 BMMCP_return_t BMMCP_init(BMMCP_handle_t * bmmcp_handle, BMMCP_receive_callback_func_t receive_callback_func);
 float BMMCP_velocity_to_si(int16_t vel);
-
+float BMMCP_torque_to_si(int16_t torque);
 // Interrupt handlers
 void BMMCP_HWDataReceivedIT(BMMCP_handle_t * bmmcp_handle);
 void BMMCP_HWDataTransmittedIT(BMMCP_handle_t * bmmcp_handle);

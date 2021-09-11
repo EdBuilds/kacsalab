@@ -15,7 +15,8 @@
 #define TELEMETRY_THRESHOLD (5)
 static uint32_t call_counter = 0;
 //1Khz loop
-void BMMCP_slave_process(void) {
+void BMMCP_slave_process(int16_t mech_speed, int16_t current)
+{
 	BMMCP_universal_packet_t received_packet = {0};
 	BMMCP_universal_packet_t packet_to_send = {0};
 	BMMCP_return_t read_result = BMMCP_read_msg(&BMMCP_handle, &received_packet);
@@ -63,6 +64,12 @@ void BMMCP_slave_process(void) {
 					send_msg = true;
 				break;
 
+				case BMMCP_get_faults:
+					packet_to_send.command = BMMCP_send_faults;
+					packet_to_send.data.faults.active = STM[0].hFaultNow;
+					packet_to_send.data.faults.occured = STM[0].hFaultOccurred;
+					send_msg = true;
+				break;
 				default:
 					// Error
 				break;
@@ -82,9 +89,9 @@ void BMMCP_slave_process(void) {
 			call_counter = 0;
 			packet_to_send.id = 0;
 			packet_to_send.command = BMMCP_telemetry;
-			packet_to_send.data.telemetry.current = 0;
+			packet_to_send.data.telemetry.current = current;
 			packet_to_send.data.telemetry.stm_state = STM_GetState(&STM[0]);
-			packet_to_send.data.telemetry.velocity = 0;
+			packet_to_send.data.telemetry.velocity = mech_speed;
 			send_msg = true;
 		}
 

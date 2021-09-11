@@ -37,7 +37,9 @@ typedef struct {
 	const void *current_state;
 	osTimerId_t timeout_timer;
 	osEventFlagsId_t event_flag;
-
+	uint16_t active_faults;
+	uint16_t occured_faults;
+    MOTOR_telem_si_t telemetry_state;
 }MOTOR_handle_t;
 
 typedef struct MOTOR_STATE_handle_t{
@@ -55,8 +57,7 @@ void MOTOR_register_timer(MOTOR_handle_t *handle, osTimerId_t timeout_timer);
 ERRORS_return_t MOTOR_command(MOTOR_handle_t *handle, MOTOR_user_command_t command);
 ERRORS_return_t MOTOR_new_message(MOTOR_handle_t *handle, BMMCP_universal_packet_t * packet);
 ERRORS_return_t MOTOR_get_state(MOTOR_handle_t *handle, MOTOR_state_t *state);
-ERRORS_return_t MOTOR_get_velocity(MOTOR_handle_t *handle, float *velocity_radps);
-ERRORS_return_t MOTOR_get_torque(MOTOR_handle_t *handle, float *torque_nm);
+void MOTOR_get_telemetry(MOTOR_handle_t *handle, MOTOR_telem_si_t *telem);
 ERRORS_return_t MOTOR_set_torque(MOTOR_handle_t *handle, float torque_nm);
 ERRORS_return_t MOTOR_timeout(MOTOR_handle_t *handle);
 

@@ -29,6 +29,10 @@ typedef struct {
 
  osEventFlagsId_t event_flag;
 
+ uint16_t active_faults;
+
+ uint16_t occured_faults;
+
 
 
 }MOTOR_handle_t;

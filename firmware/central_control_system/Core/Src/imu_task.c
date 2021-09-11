@@ -248,7 +248,6 @@ void StartImuTask(void *argument)
     	  }
 
       } else {
-    	  //failed to get data from queue
 		  LogWarn("Failed to get data from IMU queue");
       }
 	  /* Read output registers from LSM6DS3_ACC_GYRO_OUTX_L_XL to LSM6DS3_ACC_GYRO_OUTZ_H_XL. */

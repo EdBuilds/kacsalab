@@ -10,6 +10,7 @@
 
 typedef enum {
 	ERRORS_ok = 0,
+	ERRORS_initial_error,
 	ERRORS_nullptr,
 	ERRORS_argument_error,
 	ERRORS_resource_busy,

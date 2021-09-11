@@ -48,7 +48,7 @@ static void helper_get_motor_to_running()
 	BMMCP_velocity_to_si_ExpectAndReturn(0, 0.0f);
 	osTimerStop_ExpectAndReturn(test_timer_id, osOK);
 	osTimerStart_ExpectAndReturn(test_timer_id, MOTOR_TELEMERY_TIMEOUT_TICKS, osOK);
-	osEventFlagsSet_ExpectAndReturn(test_event_flags_id, MOTOR_EVENT_FLAG_ALIVE, 0U);
+	osEventFlagsSet_ExpectAndReturn(test_event_flags_id, MOTOR_EVENT_FLAG_ALIVE, MOTOR_EVENT_FLAG_ALIVE);
 	result = MOTOR_new_message(&test_handle, &test_packet);
 	TEST_ASSERT_EQUAL(result, ERRORS_ok);
 
@@ -97,7 +97,8 @@ static void helper_get_motor_to_running()
 	BMMCP_velocity_to_si_ExpectAndReturn(0, 0.0f);
 	osTimerStop_ExpectAndReturn(test_timer_id, osOK);
 	osTimerStart_ExpectAndReturn(test_timer_id, MOTOR_TELEMERY_TIMEOUT_TICKS, osOK);
-	osEventFlagsSet_ExpectAndReturn(test_event_flags_id, MOTOR_EVENT_FLAG_ALIGNED | MOTOR_EVENT_FLAG_READY, 0U);
+	volatile uint32_t flags_to_set = MOTOR_EVENT_FLAG_ALIGNED | MOTOR_EVENT_FLAG_READY;
+	osEventFlagsSet_ExpectAndReturn(test_event_flags_id, flags_to_set, flags_to_set);
 	result = MOTOR_new_message(&test_handle, &test_packet);
 	TEST_ASSERT_EQUAL(result, ERRORS_ok);
 
@@ -145,7 +146,8 @@ static void helper_get_motor_to_running()
 	BMMCP_velocity_to_si_ExpectAndReturn(0, 0.0f);
 	osTimerStop_ExpectAndReturn(test_timer_id, osOK);
 	osTimerStart_ExpectAndReturn(test_timer_id, MOTOR_TELEMERY_TIMEOUT_TICKS, osOK);
-	osEventFlagsSet_ExpectAndReturn(test_event_flags_id, MOTOR_EVENT_FLAG_STARTED, 0U);
+    flags_to_set = MOTOR_EVENT_FLAG_STARTED | MOTOR_EVENT_FLAG_ALIGNED;
+	osEventFlagsSet_ExpectAndReturn(test_event_flags_id, flags_to_set, flags_to_set);
 	result = MOTOR_new_message(&test_handle, &test_packet);
 	TEST_ASSERT_EQUAL(result, ERRORS_ok);
 
@@ -199,7 +201,16 @@ void test_startup_process(void)
 	TEST_ASSERT_EQUAL(result, ERRORS_ok);
 
 	// Receive intermitten telemetry
-	helper_receive_generic_telemetry(RUN);
+
+	test_packet.command = BMMCP_telemetry;
+	test_packet.data.telemetry.stm_state = RUN;
+	BMMCP_velocity_to_si_ExpectAndReturn(0, 0.0f);
+	osTimerStop_ExpectAndReturn(test_timer_id, osOK);
+	osTimerStart_ExpectAndReturn(test_timer_id, MOTOR_TELEMERY_TIMEOUT_TICKS, osOK);
+    uint32_t flags_to_set = MOTOR_EVENT_FLAG_STARTED | MOTOR_EVENT_FLAG_ALIGNED;
+	osEventFlagsSet_ExpectAndReturn(test_event_flags_id, flags_to_set, flags_to_set);
+	result = MOTOR_new_message(&test_handle, &test_packet);
+	TEST_ASSERT_EQUAL(result, ERRORS_ok);
 
 	// Receive response to stop request
 	test_packet.command = BMMCP_response;
@@ -208,7 +219,15 @@ void test_startup_process(void)
 	TEST_ASSERT_EQUAL(result, ERRORS_ok);
 
 	// telemetries walking through the stopping process
-	helper_receive_generic_telemetry(ANY_STOP);
+	test_packet.command = BMMCP_telemetry;
+	test_packet.data.telemetry.stm_state = ANY_STOP;
+	BMMCP_velocity_to_si_ExpectAndReturn(0, 0.0f);
+	osTimerStop_ExpectAndReturn(test_timer_id, osOK);
+	osTimerStart_ExpectAndReturn(test_timer_id, MOTOR_TELEMERY_TIMEOUT_TICKS, osOK);
+    uint32_t flags_to_clear = MOTOR_EVENT_FLAG_STARTED ;
+	osEventFlagsClear_ExpectAndReturn(test_event_flags_id, flags_to_clear, flags_to_clear);
+	result = MOTOR_new_message(&test_handle, &test_packet);
+	TEST_ASSERT_EQUAL(result, ERRORS_ok);
 	helper_receive_generic_telemetry(STOP);
 	helper_receive_generic_telemetry(STOP_IDLE);
 	helper_receive_generic_telemetry(ICLWAIT);
@@ -221,7 +240,7 @@ void test_startup_process(void)
 	BMMCP_velocity_to_si_ExpectAndReturn(0, 0.0f);
 	osTimerStop_ExpectAndReturn(test_timer_id, osOK);
 	osTimerStart_ExpectAndReturn(test_timer_id, MOTOR_TELEMERY_TIMEOUT_TICKS, osOK);
-	osEventFlagsSet_ExpectAndReturn(test_event_flags_id, MOTOR_EVENT_FLAG_ALIGNED | MOTOR_EVENT_FLAG_READY, 0U);
+	osEventFlagsSet_ExpectAndReturn(test_event_flags_id, MOTOR_EVENT_FLAG_ALIGNED | MOTOR_EVENT_FLAG_READY, MOTOR_EVENT_FLAG_ALIGNED | MOTOR_EVENT_FLAG_READY);
 	result = MOTOR_new_message(&test_handle, &test_packet);
 	TEST_ASSERT_EQUAL(result, ERRORS_ok);
 }
@@ -252,7 +271,13 @@ void test_motor_fault(void)
 	osTimerStop_ExpectAndReturn(test_timer_id, osOK);
 	osTimerStart_ExpectAndReturn(test_timer_id, MOTOR_TELEMERY_TIMEOUT_TICKS, osOK);
 	osEventFlagsClear_ExpectAndReturn(test_event_flags_id, MOTOR_EVENT_FLAG_STARTED, 0U);
-	osEventFlagsSet_ExpectAndReturn(test_event_flags_id, MOTOR_EVENT_FLAG_FAULT, 0U);
+	osEventFlagsSet_ExpectAndReturn(test_event_flags_id, MOTOR_EVENT_FLAG_FAULT, MOTOR_EVENT_FLAG_FAULT);
+
+	// Send fault query command
+	SHARED_TASK_get_bmmcp_master_queue_ExpectAndReturn(test_bmmcp_queue);
+	osMessageQueuePut_ExpectAndReturn(test_bmmcp_queue, NULL, 0, 0, osOK);
+	osMessageQueuePut_IgnoreArg_msg_ptr();
+
 	result = MOTOR_new_message(&test_handle, &test_packet);
 	TEST_ASSERT_EQUAL(result, ERRORS_ok);
 
@@ -269,9 +294,16 @@ void test_motor_fault(void)
 	BMMCP_velocity_to_si_ExpectAndReturn(0, 0.0f);
 	osTimerStop_ExpectAndReturn(test_timer_id, osOK);
 	osTimerStart_ExpectAndReturn(test_timer_id, MOTOR_TELEMERY_TIMEOUT_TICKS, osOK);
-	osEventFlagsSet_ExpectAndReturn(test_event_flags_id, MOTOR_EVENT_FLAG_FAULT, 0U);
+	osEventFlagsSet_ExpectAndReturn(test_event_flags_id, MOTOR_EVENT_FLAG_FAULT, MOTOR_EVENT_FLAG_FAULT);
+
+	// Send fault query command
+	SHARED_TASK_get_bmmcp_master_queue_ExpectAndReturn(test_bmmcp_queue);
+	osMessageQueuePut_ExpectAndReturn(test_bmmcp_queue, NULL, 0, 0, osOK);
+	osMessageQueuePut_IgnoreArg_msg_ptr();
+
 	result = MOTOR_new_message(&test_handle, &test_packet);
 	TEST_ASSERT_EQUAL(result, ERRORS_ok);
+
 	// Send appropriate reset command
 	SHARED_TASK_get_bmmcp_master_queue_ExpectAndReturn(test_bmmcp_queue);
 	osMessageQueuePut_ExpectAndReturn(test_bmmcp_queue, NULL, 0, 0, osOK);

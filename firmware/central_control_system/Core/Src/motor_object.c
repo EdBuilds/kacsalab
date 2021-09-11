@@ -213,11 +213,40 @@ ERRORS_return_t MOTOR_OBJ_release(uint8_t id)
 	return result;
 }
 
-ERRORS_return_t MOTOR_OBJ_get_state(uint8_t id, MOTOR_state_t * state)
+ERRORS_return_t MOTOR_OBJ_get_state(uint8_t id, MOTOR_state_t * state, uint32_t timeout)
 {
-	return ERRORS_not_implemented;
+	ERRORS_return_t result = ERRORS_ok;
+	if (id >= MOTOR_NUM) {
+		result = ERRORS_argument_error;
+	} else if (osMutexAcquire(s_motor_mutex[id], timeout) != osOK) {
+		result = ERRORS_resource_busy;
+	} else {
+
+		result = MOTOR_get_state(&(s_motor_handle[id]), state);
+
+		if (osMutexRelease(s_motor_mutex[id]) != osOK) {
+			result = ERRORS_os_error;
+		}
+	}
+	return result;
 }
-ERRORS_return_t MOTOR_OBJ_get_telemetry(uint8_t id, MOTOR_telem_si_t * telemetry) {return ERRORS_not_implemented;}
+ERRORS_return_t MOTOR_OBJ_get_telemetry(uint8_t id, MOTOR_telem_si_t * telemetry, uint32_t timeout)
+{
+	ERRORS_return_t result = ERRORS_ok;
+	if (id >= MOTOR_NUM) {
+		result = ERRORS_argument_error;
+	} else if (osMutexAcquire(s_motor_mutex[id], timeout) != osOK) {
+		result = ERRORS_resource_busy;
+	} else {
+
+		MOTOR_get_telemetry(&(s_motor_handle[id]), telemetry);
+
+		if (osMutexRelease(s_motor_mutex[id]) != osOK) {
+			result = ERRORS_os_error;
+		}
+	}
+	return result;
+}
 ERRORS_return_t MOTOR_OBJ_new_message(BMMCP_universal_packet_t * packet)
 {
 	ERRORS_return_t result = ERRORS_ok;

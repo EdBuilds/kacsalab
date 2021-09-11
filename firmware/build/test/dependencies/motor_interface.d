@@ -11,4 +11,5 @@ build/test/out/c/motor_interface.o: \
  central_control_system/board_support/log_interface_config.h \
  central_control_system/Middlewares/Third_Party/FreeRTOS-Plus/Source/Utilities/logging/logging_stack.h \
  central_control_system/Middlewares/Third_Party/FreeRTOS-Plus/Source/Utilities/logging/logging_levels.h \
- central_control_system/Core/Inc/shared_task_resources.h
+ central_control_system/Core/Inc/shared_task_resources.h \
+ libcommon/bmmcp/bmmcp_faults.h

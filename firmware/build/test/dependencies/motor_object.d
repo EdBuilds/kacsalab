@@ -6,7 +6,7 @@ build/test/out/c/motor_object.o: \
  central_control_system/Core/Inc/motor_common_types.h \
  central_control_system/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
  central_control_system/Core/Inc/motor_interface.h \
- central_control_system/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_cb_sizes.h \
+ central_control_system/Core/Inc/cmsis_cb_sizes.h \
  central_control_system/Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  central_control_system/Core/Inc/FreeRTOSConfig.h \
  central_control_system/Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h \

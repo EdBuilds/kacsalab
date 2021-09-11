@@ -9,6 +9,7 @@
 #include "bmmcp/bmmcp_common.h"
 #include "logging.h"
 #include "shared_task_resources.h"
+#include "bmmcp/bmmcp_faults.h"
 
 // entry functions
 static ERRORS_return_t MOTOR_STATE_unknown_entry(MOTOR_handle_t * handle);
@@ -25,6 +26,7 @@ static ERRORS_return_t MOTOR_STATE_reset_fault_sent_entry(MOTOR_handle_t * handl
 static ERRORS_return_t MOTOR_STATE_unknown_exit(MOTOR_handle_t * handle);
 static ERRORS_return_t MOTOR_STATE_idle_aligned_exit(MOTOR_handle_t * handle);
 static ERRORS_return_t MOTOR_STATE_running_exit(MOTOR_handle_t * handle);
+static ERRORS_return_t MOTOR_STATE_faults_exit(MOTOR_handle_t * handle);
 
 // user command functions
 static void * MOTOR_STATE_idle_not_aligned_user_command(MOTOR_user_command_t user_command);
@@ -117,7 +119,7 @@ static const MOTOR_STATE_handle_t c_MOTOR_STATE_stopping = {
 };
 static const MOTOR_STATE_handle_t c_MOTOR_STATE_active_fault = {
 	.MOTOR_STATE_entry_func = &MOTOR_STATE_faults_entry,
-	.MOTOR_STATE_exit_func = NULL,
+	.MOTOR_STATE_exit_func = &MOTOR_STATE_faults_exit,
     .MOTOR_STATE_user_command = NULL,
 	.MOTOR_STATE_new_slave_state = NULL,
 	.MOTOR_STATE_slave_command_response = NULL,
@@ -138,6 +140,7 @@ static const MOTOR_STATE_handle_t c_MOTOR_STATE_reset_fault_command_sent = {
 };
 static ERRORS_return_t set_next_state(MOTOR_handle_t *handle, const MOTOR_STATE_handle_t * next_state);
 static const void* common_state_transition(MOTOR_handle_t *handle, BMMCP_slave_state_t slave_state);
+static void MOTOR_reset_telemetry(MOTOR_telem_si_t * telemetry);
 
 static ERRORS_return_t set_next_state(MOTOR_handle_t *handle, const MOTOR_STATE_handle_t * next_state)
 {
@@ -206,6 +209,12 @@ static const void* common_state_transition(MOTOR_handle_t *handle, BMMCP_slave_s
 	}
 	return next_state;
 }
+static void MOTOR_reset_telemetry(MOTOR_telem_si_t * telemetry)
+{
+    telemetry->velocity = 0.0f;
+    telemetry->torque = 0.0f;
+    telemetry->state = OBJ_data_not_available;
+}
 void MOTOR_init(MOTOR_handle_t *handle, uint8_t motor_id, osEventFlagsId_t event_flag)
 {
 	handle->event_flag = event_flag;
@@ -213,6 +222,9 @@ void MOTOR_init(MOTOR_handle_t *handle, uint8_t motor_id, osEventFlagsId_t event
 	handle->current_state = (void *)&c_MOTOR_STATE_unknown;
 	handle->timeout_timer = NULL;
 	handle->velocity_radps = 0.0f;
+	handle->active_faults = MC_NO_FAULTS;
+	handle->occured_faults = MC_NO_FAULTS;
+	MOTOR_reset_telemetry(&(handle->telemetry_state));
 	((const MOTOR_STATE_handle_t *)handle->current_state)->MOTOR_STATE_entry_func(handle);
 }
 void MOTOR_deinit(MOTOR_handle_t *handle)
@@ -250,7 +262,9 @@ ERRORS_return_t MOTOR_new_message(MOTOR_handle_t *handle, BMMCP_universal_packet
 	BMMCP_slave_state_t slave_state = 0;
 	switch (packet->command) {
 		case BMMCP_telemetry:
-			handle->velocity_radps = BMMCP_velocity_to_si(packet->data.telemetry.velocity);
+			handle->telemetry_state.velocity = BMMCP_velocity_to_si(packet->data.telemetry.velocity);
+			handle->telemetry_state.torque = BMMCP_torque_to_si(packet->data.telemetry.current);
+			handle->telemetry_state.state = OBJ_new_data;
 
 			if (handle->timeout_timer != NULL) {
     			if (osTimerStop(handle->timeout_timer) != osOK) {
@@ -281,6 +295,11 @@ ERRORS_return_t MOTOR_new_message(MOTOR_handle_t *handle, BMMCP_universal_packet
 				result = set_next_state(handle, (const MOTOR_STATE_handle_t *)new_state);
 			}
 		break;
+		case BMMCP_send_faults:
+			handle->active_faults = packet->data.faults.active;
+			handle->occured_faults = packet->data.faults.occured;
+
+		break;
 		default:
 		break;
 	}
@@ -289,19 +308,26 @@ ERRORS_return_t MOTOR_new_message(MOTOR_handle_t *handle, BMMCP_universal_packet
 
 ERRORS_return_t MOTOR_get_state(MOTOR_handle_t *handle, MOTOR_state_t *state)
 {
-	return ERRORS_not_implemented;
+	if (handle->current_state == (void *)&c_MOTOR_STATE_running) {
+			*state = MOTOR_state_running;
+	}else if ((handle->current_state == (void *)&c_MOTOR_STATE_active_fault) |
+              (handle->current_state == (void *)&c_MOTOR_STATE_passive_fault)) {
+			*state = MOTOR_state_fault;
+	}else {
+		*state = MOTOR_state_unknown;
+	}
+	return ERRORS_ok;
 }
 
-ERRORS_return_t MOTOR_get_velocity(MOTOR_handle_t *handle, float *velocity_radps)
+void MOTOR_get_telemetry(MOTOR_handle_t *handle, MOTOR_telem_si_t *telem)
 {
-	return ERRORS_not_implemented;
+	telem->velocity = handle->telemetry_state.velocity;
+	telem->torque = handle->telemetry_state.torque;
+	telem->state = handle->telemetry_state.state;
+	if (handle->telemetry_state.state != OBJ_data_not_available) {
+		handle->telemetry_state.state = OBJ_no_new_data;
+	}
 }
-
-ERRORS_return_t MOTOR_get_torque(MOTOR_handle_t *handle, float *torque_nm)
-{
-	return ERRORS_not_implemented;
-}
-
 
 ERRORS_return_t MOTOR_set_torque(MOTOR_handle_t *handle, float torque_nm)
 {
@@ -337,6 +363,9 @@ static ERRORS_return_t MOTOR_STATE_unknown_entry(MOTOR_handle_t * handle)
 	if ((osEventFlagsClear(handle->event_flag, MOTOR_EVENT_FLAG_ALL) & MOTOR_EVENT_FLAG_ALL) != 0) {
 		result = ERRORS_os_error;
 	}
+	handle->active_faults = MC_NO_FAULTS;
+	handle->occured_faults = MC_NO_FAULTS;
+	MOTOR_reset_telemetry(&(handle->telemetry_state));
 	return result;
 }
 static ERRORS_return_t MOTOR_STATE_alignment_command_sent_entry(MOTOR_handle_t * handle)
@@ -358,8 +387,10 @@ static ERRORS_return_t MOTOR_STATE_alignment_command_sent_entry(MOTOR_handle_t *
 }
 static ERRORS_return_t MOTOR_STATE_idle_aligned_entry(MOTOR_handle_t * handle)
 {
+	const uint32_t running_state_flags = MOTOR_EVENT_FLAG_READY | MOTOR_EVENT_FLAG_ALIGNED;
 	ERRORS_return_t result = ERRORS_ok;
-	if ((osEventFlagsSet(handle->event_flag, MOTOR_EVENT_FLAG_READY | MOTOR_EVENT_FLAG_ALIGNED) & (MOTOR_EVENT_FLAG_READY | MOTOR_EVENT_FLAG_ALIGNED)) == 0) {
+    volatile uint32_t flags_after = osEventFlagsSet(handle->event_flag, running_state_flags);
+	if ((flags_after & running_state_flags) == 0) {
 		result = ERRORS_os_error;
 	}
 	return result;
@@ -402,7 +433,8 @@ static ERRORS_return_t MOTOR_STATE_running_entry(MOTOR_handle_t * handle)
 {
 	const uint32_t running_state_flags = MOTOR_EVENT_FLAG_STARTED | MOTOR_EVENT_FLAG_ALIGNED;
 	ERRORS_return_t result = ERRORS_ok;
-	if ((osEventFlagsSet(handle->event_flag, running_state_flags) & running_state_flags) == 0) {
+    volatile uint32_t flags_after = osEventFlagsSet(handle->event_flag, running_state_flags);
+	if ((flags_after & running_state_flags) == 0) {
 		result = ERRORS_os_error;
 	}
 	return result;
@@ -430,6 +462,19 @@ static ERRORS_return_t MOTOR_STATE_faults_entry(MOTOR_handle_t * handle)
 	if ((osEventFlagsSet(handle->event_flag, MOTOR_EVENT_FLAG_FAULT) & MOTOR_EVENT_FLAG_FAULT) == 0) {
 		result = ERRORS_os_error;
 	}
+	BMMCP_master_task_msg_t get_faults_msg = {
+			.variant = BMMCP_MASTER_TASK_packet_send,
+			.payload = {
+					.packet = {
+							.id = handle->motor_id,
+							.command = BMMCP_get_faults,
+					},
+			},
+	};
+	if (osMessageQueuePut(SHARED_TASK_get_bmmcp_master_queue(), &get_faults_msg, 0, 0) != osOK) {
+		result = ERRORS_os_error;
+	}
+
 	return result;
 }
 static ERRORS_return_t MOTOR_STATE_reset_fault_sent_entry(MOTOR_handle_t * handle)
@@ -475,6 +520,14 @@ static ERRORS_return_t MOTOR_STATE_running_exit(MOTOR_handle_t * handle)
 	osEventFlagsClear(handle->event_flag, MOTOR_EVENT_FLAG_STARTED);
 	return result;
 }
+
+static ERRORS_return_t MOTOR_STATE_faults_exit(MOTOR_handle_t * handle)
+{
+	ERRORS_return_t result = ERRORS_ok;
+	handle->active_faults = MC_NO_FAULTS;
+	return result;
+}
+
 
 static void * MOTOR_STATE_idle_not_aligned_user_command(MOTOR_user_command_t user_command)
 {

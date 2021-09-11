@@ -132,3 +132,8 @@ float BMMCP_velocity_to_si(int16_t vel){
 	//TODO implement the conversion
 	return (float)vel;
 }
+
+float BMMCP_torque_to_si(int16_t torque){
+	//TODO implement the conversion
+	return (float)torque;
+}

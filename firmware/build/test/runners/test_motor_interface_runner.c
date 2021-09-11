@@ -122,9 +122,9 @@ int main(void)
 {
   suite_setup();
   UnityBegin("test_motor_interface.c");
-  RUN_TEST(test_startup_process, 177);
-  RUN_TEST(test_other_states_from_unknown_state, 229);
-  RUN_TEST(test_motor_fault, 234);
+  RUN_TEST(test_startup_process, 179);
+  RUN_TEST(test_other_states_from_unknown_state, 248);
+  RUN_TEST(test_motor_fault, 253);
 
   CMock_Guts_MemFreeFinal();
   return suite_teardown(UnityEnd());

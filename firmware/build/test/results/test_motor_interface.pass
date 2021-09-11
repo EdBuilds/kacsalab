@@ -4,13 +4,13 @@
   :file: test_motor_interface.c
 :successes:
 - :test: test_startup_process
-  :line: 177
+  :line: 179
   :message: ''
 - :test: test_other_states_from_unknown_state
-  :line: 229
+  :line: 248
   :message: ''
 - :test: test_motor_fault
-  :line: 234
+  :line: 253
   :message: ''
 :failures: []
 :ignores: []
@@ -20,4 +20,4 @@
   :failed: 0
   :ignored: 0
 :stdout: []
-:time: 0.0029253810025693383
+:time: 0.0015494060007767985

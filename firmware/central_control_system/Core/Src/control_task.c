@@ -17,6 +17,8 @@ void start_control_task(void *argument) {
 				break;
 			}
 		}
+	} else {
+
 	}
 	CONTROL_TASK_deinit(&s_control_task_handle);
 }

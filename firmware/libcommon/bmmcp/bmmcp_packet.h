@@ -21,6 +21,7 @@ typedef enum {
 	BMMCP_reset_torque = 8,
 	BMMCP_acknowledge_fault = 9,
 	BMMCP_response = 10,
+	BMMCP_send_faults = 12,
 }BMMCP_command_t;
 
 typedef enum {
@@ -35,12 +36,18 @@ typedef struct {
 }BMMCP_telemetry_payload_t;
 
 typedef struct {
+    uint16_t active;
+    uint16_t occured;
+}BMMCP_faults_payload_t;
+
+typedef struct {
 	uint8_t id;
 	BMMCP_command_t command;
 	union {
 		BMMCP_telemetry_payload_t telemetry;
 		uint16_t current;
 		BMMCP_response_t command_response;
+		BMMCP_faults_payload_t faults;
 	}data;
 }BMMCP_universal_packet_t;
 

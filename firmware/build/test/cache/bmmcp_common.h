@@ -33,6 +33,8 @@ typedef enum {
 
 }BMMCP_return_t;
 
+
+
 typedef enum {
 
  BMMCP_empty = 0,
@@ -59,11 +61,11 @@ typedef struct {
 
  BMMCP_receive_callback_func_t receive_callback_func;
 
- uint8_t receive_buffer[(3U)];
+ uint8_t receive_buffer[(7U)];
 
  BMMCP_lock_state_t receive_buffer_lock;
 
- uint8_t transmit_buffer[(3U)];
+ uint8_t transmit_buffer[(7U)];
 
  BMMCP_lock_state_t transmit_buffer_lock;
 

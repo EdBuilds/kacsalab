@@ -12,6 +12,11 @@ const char * ERRORS_error_to_string(ERRORS_return_t error)
 	case ERRORS_not_implemented:
 		return "Function not implemented";
 	break;
+
+	case ERRORS_initial_error:
+		return "Initial error state not updated";
+	break;
+
 	default:
 		return "Error string not available";
 	break;

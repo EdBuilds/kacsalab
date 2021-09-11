@@ -52,9 +52,9 @@ ERRORS_return_t FRAME_init(void)
 	ERRORS_return_t result = ERRORS_ok;
 
 	for (uint8_t axis_idx = 0U; axis_idx < FRAME_axis_num; ++axis_idx){
-		s_frame_state[axis_idx].angle.state = FRAME_data_not_available;
+		s_frame_state[axis_idx].angle.state = OBJ_data_not_available;
 		s_frame_state[axis_idx].angle.data = 0.0f;
-		s_frame_state[axis_idx].rate.state = FRAME_data_not_available;
+		s_frame_state[axis_idx].rate.state = OBJ_data_not_available;
 		s_frame_state[axis_idx].rate.data = 0.0f;
 	}
 
@@ -74,16 +74,16 @@ ERRORS_return_t FRAME_deinit(void)
 	return result;
 
 }
-ERRORS_return_t FRAME_get_state(FRAME_axis_t axis, FRAME_state_si_t *state)
+ERRORS_return_t FRAME_get_state(FRAME_axis_t axis, FRAME_state_si_t *state, uint32_t timeout)
 {
 	ERRORS_return_t result = ERRORS_ok;
 	if (axis >= FRAME_axis_num && state != NULL) {
 		result = ERRORS_argument_error;
 	} else {
-		if (osMutexAcquire(s_frame_mutex, 0U) == osOK) {
+		if (osMutexAcquire(s_frame_mutex, timeout) == osOK) {
 			memcpy(state, &(s_frame_state[axis]), sizeof(FRAME_state_si_t));
-			s_frame_state[axis].angle.state = FRAME_no_new_data;
-			s_frame_state[axis].rate.state = FRAME_no_new_data;
+			s_frame_state[axis].angle.state = OBJ_no_new_data;
+			s_frame_state[axis].rate.state = OBJ_no_new_data;
 			if (osMutexRelease(s_frame_mutex) != osOK) {
 				result = ERRORS_resource_busy;
 			}
@@ -115,7 +115,7 @@ ERRORS_return_t FRAME_set_angle(FRAME_axis_t axis, float angle_rad)
 			break;
 			}
 			s_frame_state[axis].angle.data = angle_rad;
-			s_frame_state[axis].angle.state = FRAME_new_data;
+			s_frame_state[axis].angle.state = OBJ_new_data;
 			if (osMutexRelease(s_frame_mutex) != osOK) {
 				result = ERRORS_resource_busy;
 			}
@@ -147,7 +147,7 @@ ERRORS_return_t FRAME_set_rate(FRAME_axis_t axis, float rate_radps)
 			break;
 			}
 			s_frame_state[axis].rate.data = rate_radps;
-			s_frame_state[axis].rate.state = FRAME_new_data;
+			s_frame_state[axis].rate.state = OBJ_new_data;
 			if (osMutexRelease(s_frame_mutex) != osOK) {
 				result = ERRORS_os_error;
 			}

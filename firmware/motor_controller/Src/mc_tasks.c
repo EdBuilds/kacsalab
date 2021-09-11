@@ -87,7 +87,7 @@ uint8_t bMCBootCompleted = 0;
 /* USER CODE END Private Variables */
 
 /* Private functions ---------------------------------------------------------*/
-void TSK_MediumFrequencyTaskM1(void);
+void TSK_MediumFrequencyTaskM1(int16_t * velocity);
 void FOC_Clear(uint8_t bMotor);
 void FOC_InitAdditionalMethods(uint8_t bMotor);
 void FOC_CalcCurrRef(uint8_t bMotor);
@@ -256,7 +256,8 @@ __weak void MC_Scheduler(void)
     }
     else
     {
-      TSK_MediumFrequencyTaskM1();
+      int16_t mech_velocity = 0;
+      TSK_MediumFrequencyTaskM1(&mech_velocity);
 
 #ifdef ASPEP
       MCP_Over_UartA.rxBuffer = MCP_Over_UartA.pTransportLayer->fRXPacketProcess ( MCP_Over_UartA.pTransportLayer,  &MCP_Over_UartA.rxLength);
@@ -275,7 +276,7 @@ __weak void MC_Scheduler(void)
       }
 
 #elif BMMCP
-      BMMCP_slave_process();
+      BMMCP_slave_process(mech_velocity, FOCVars[M1].Iqd.q);
 #endif
       /* USER CODE BEGIN MC_Scheduler 1 */
 
@@ -307,16 +308,15 @@ __weak void MC_Scheduler(void)
   * execution at a medium frequency rate (such as the speed controller for instance)
   * are executed here.
   */
-__weak void TSK_MediumFrequencyTaskM1(void)
+__weak void TSK_MediumFrequencyTaskM1(int16_t *velocity)
 {
   /* USER CODE BEGIN MediumFrequencyTask M1 0 */
 
   /* USER CODE END MediumFrequencyTask M1 0 */
 
   State_t StateM1;
-  int16_t wAux = 0;
 
-  (void) ENC_CalcAvrgMecSpeedUnit( &ENCODER_M1, &wAux );
+  (void) ENC_CalcAvrgMecSpeedUnit( &ENCODER_M1, velocity );
   PQD_CalcElMotorPower( pMPM[M1] );
 
   StateM1 = STM_GetState( &STM[M1] );

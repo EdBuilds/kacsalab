@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<testsuites tests="12" failures="0" skipped="0" time="0.007340">
-  <testsuite name="test_console_command_helpers" tests="1" failures="0" skipped="0" time="0.001207">
+<testsuites tests="12" failures="0" skipped="0" time="0.006609">
+  <testsuite name="test_console_command_helpers" tests="1" failures="0" skipped="0" time="0.001258">
     <testcase name="test_getobj_helper_string_build" />
   </testsuite>
-  <testsuite name="test_motor_interface" tests="3" failures="0" skipped="0" time="0.002925">
+  <testsuite name="test_motor_interface" tests="3" failures="0" skipped="0" time="0.001549">
     <testcase name="test_startup_process" />
     <testcase name="test_other_states_from_unknown_state" />
     <testcase name="test_motor_fault" />
   </testsuite>
-  <testsuite name="test_motor_obj" tests="7" failures="0" skipped="0" time="0.001564">
+  <testsuite name="test_motor_obj" tests="7" failures="0" skipped="0" time="0.001994">
     <testcase name="test_take_motor_sucsess" />
     <testcase name="test_take_motor_fail" />
     <testcase name="test_release_motor_sucsess" />
@@ -17,7 +17,7 @@
     <testcase name="test_motor_start_already_started" />
     <testcase name="test_motor_start_fault_during_alignment" />
   </testsuite>
-  <testsuite name="test_shared_task_resources" tests="1" failures="0" skipped="0" time="0.001644">
+  <testsuite name="test_shared_task_resources" tests="1" failures="0" skipped="0" time="0.001808">
     <testcase name="test_shared_resource_init" />
   </testsuite>
 </testsuites>
