@@ -9,9 +9,12 @@
 #define INC_CONTROL_TASK_EXECUTER_H_
 
 #include "errors/errors.h"
+#include "controller_types.h"
+#include "stdint.h"
 
 typedef struct {
-
+    float setpoint_vector[CONTROL_state_num];
+    uint32_t tick;
 }CONTROL_TASK_handle_t;
 
 ERRORS_return_t CONTROL_TASK_init(CONTROL_TASK_handle_t *handle);

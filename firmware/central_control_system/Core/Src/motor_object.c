@@ -247,6 +247,26 @@ ERRORS_return_t MOTOR_OBJ_get_telemetry(uint8_t id, MOTOR_telem_si_t * telemetry
 	}
 	return result;
 }
+
+ERRORS_return_t MOTOR_OBJ_set_torque(uint8_t id, float torque, uint32_t timeout)
+{
+	ERRORS_return_t result = ERRORS_ok;
+	if (id >= MOTOR_NUM) {
+		result = ERRORS_argument_error;
+	} else if (osMutexAcquire(s_motor_mutex[id], timeout) != osOK) {
+		result = ERRORS_resource_busy;
+	} else {
+
+		MOTOR_set_torque(&(s_motor_handle[id]), torque);
+
+		if (osMutexRelease(s_motor_mutex[id]) != osOK) {
+			result = ERRORS_os_error;
+		}
+	}
+	return result;
+
+}
+
 ERRORS_return_t MOTOR_OBJ_new_message(BMMCP_universal_packet_t * packet)
 {
 	ERRORS_return_t result = ERRORS_ok;

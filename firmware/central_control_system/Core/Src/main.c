@@ -18,6 +18,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f303x8.h"
 #include "main.h"
 #include "cmsis_os.h"
 #include "i2c.h"
@@ -29,6 +30,7 @@
 #include "bmmcp_config.h"
 #include "object_manager.h"
 #include "logging.h"
+#include "controller.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */

@@ -25,6 +25,7 @@ ERRORS_return_t MOTOR_OBJ_take(uint8_t id);
 ERRORS_return_t MOTOR_OBJ_release(uint8_t id);
 ERRORS_return_t MOTOR_OBJ_get_state(uint8_t id, MOTOR_state_t * state, uint32_t timeout);
 ERRORS_return_t MOTOR_OBJ_get_telemetry(uint8_t id, MOTOR_telem_si_t * telemetry, uint32_t timeout);
+ERRORS_return_t MOTOR_OBJ_set_torque(uint8_t id, float torque, uint32_t timeout);
 ERRORS_return_t MOTOR_OBJ_new_message(BMMCP_universal_packet_t * packet);
 ERRORS_return_t MOTOR_OBJ_create_telemetry_timer(MOTOR_OBJ_timer_callback_func_t callback);
 ERRORS_return_t MOTOR_OBJ_print_state(char *buffer, size_t buffer_len, size_t *used_buffer_space);

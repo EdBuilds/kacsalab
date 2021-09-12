@@ -338,8 +338,7 @@ ERRORS_return_t MOTOR_set_torque(MOTOR_handle_t *handle, float torque_nm)
 					.packet = {
 							.id = handle->motor_id,
 							.command = BMMCP_set_current,
-							.data.current = torque_nm,
-
+							.data.current = (int16_t)(torque_nm * 1000.0),
 					},
 			},
 	};

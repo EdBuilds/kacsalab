@@ -14,15 +14,15 @@
 #include "controller.h"
 
 static const uint32_t c_short_timeout = 10U;
-static float s_state_setpoint[CONTROL_state_num] = {0.0f};
 
 ERRORS_return_t CONTROL_TASK_init(CONTROL_TASK_handle_t *handle)
 {
 
 	ERRORS_return_t result = ERRORS_ok;
 
+	handle->tick = osKernelGetTickCount();
     for (uint8_t state_idx = 0U; state_idx < CONTROL_state_num; ++state_idx) {
-    	s_state_setpoint[state_idx] = 0.0f;
+    	handle->setpoint_vector[state_idx] = 0.0f;
     }
 
     for (uint8_t idx = 0U; idx < MOTOR_NUM; ++idx) {
@@ -46,7 +46,7 @@ ERRORS_return_t CONTROL_TASK_execute(CONTROL_TASK_handle_t *handle)
 	ERRORS_return_t result = ERRORS_initial_error;
 	bool abort_loop = false;
 	float state_vector[CONTROL_state_num] = {0};
-	float output_vector[c_CONTROL_output_num] = {0};
+	float output_vector[CONTROL_OUTPUT_NUM] = {0};
 	MOTOR_telem_si_t telemetries[MOTOR_NUM] = {0};
 	FRAME_state_si_t frame_state[FRAME_axis_num] = {0};
 
@@ -56,6 +56,7 @@ ERRORS_return_t CONTROL_TASK_execute(CONTROL_TASK_handle_t *handle)
 	    result = MOTOR_OBJ_get_state(idx, &state, c_short_timeout);
 	    if (result != ERRORS_ok) {
         	LogError("Could not get motor state, %s", ERRORS_error_to_string(result));
+        	break;
 	    } else {
 	    	if (state != MOTOR_state_running) {
 	    		LogError("Motor idx:%i is in fault state", idx);
@@ -65,11 +66,13 @@ ERRORS_return_t CONTROL_TASK_execute(CONTROL_TASK_handle_t *handle)
     	    		if (telemetries[idx].state == OBJ_data_not_available) {
     	    			LogError("Motor idx:%i has no telemetry yet, skipping loop", idx);
     	    			abort_loop = true;
+    	    			break;
     	    		} else if (telemetries[idx].state == OBJ_no_new_data) {
     	    			LogWarn("Motor idx:%i has no new telemetry", idx);
     	    		}
 	    		} else {
-
+	    			LogError("Could not get motor idx:%i telemetry, %s", idx, ERRORS_error_to_string(result));
+	    			break;
 	    		}
 	    	}
 	    }
@@ -84,10 +87,8 @@ ERRORS_return_t CONTROL_TASK_execute(CONTROL_TASK_handle_t *handle)
 
     	if (result != ERRORS_ok) {
         	LogError("Could not get frame state, %s", ERRORS_error_to_string(result));
-    	} else {    if ((result != ERRORS_ok) | abort_loop) {
-        	return result;
-        }
-
+        	break;
+    	} else {
 
         	if (frame_state[idx].angle.state == OBJ_data_not_available) {
         	    LogError("Frame axis idx:%i has no angle yet, skipping loop", idx);
@@ -116,11 +117,28 @@ ERRORS_return_t CONTROL_TASK_execute(CONTROL_TASK_handle_t *handle)
 	state_vector[CONTROL_pitch_rate] = frame_state[FRAME_pitch].rate.data;
 	state_vector[CONTROL_roll_rate] = frame_state[FRAME_roll].rate.data;
 
-
 	//pass measurement data to controller
 	//get command from controller
-	//feed command to motors
+	CONTROLLER_state_space_run(handle->setpoint_vector, state_vector, output_vector);
 
+	//feed command to motors
+    for (uint8_t idx = 0U; idx < MOTOR_NUM; ++idx) {
+    	result = MOTOR_OBJ_set_torque(idx, output_vector[idx], c_short_timeout);
+    	if (result!= ERRORS_ok) {
+    	    LogError("Could not set Motor idx:%i torque, %s", idx, ERRORS_error_to_string(result));
+    	    break;
+    	}
+    }
+
+    handle->tick += 1000U;
+
+    if (osKernelGetTickCount() >= handle->tick) {
+        LogWarn("Control task deadline violation");
+    }
+    if (osDelayUntil(handle->tick) != osOK) {
+    	LogError("Could not delay the controller task");
+    	result = ERRORS_os_error;
+    }
     return result;
 }
 
